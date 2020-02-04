@@ -1,0 +1,3 @@
+QT Creator版本代码，完成了之前的YOLO检测人头并进行卡尔曼跟踪。
+后续不再更新QT，考虑使用cmake。
+在branch分支的Cmake_code中
