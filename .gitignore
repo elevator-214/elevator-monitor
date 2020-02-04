@@ -1,0 +1,14 @@
+#c++库
+*.so
+*.o
+
+build/*
+debug/*
+release/*
+classifier/*
+
+#yolo file
+*.weights
+
+
+

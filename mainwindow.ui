@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1330</width>
+    <height>1050</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>10</y>
+      <width>640</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>10</y>
+      <width>640</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>500</y>
+      <width>640</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>500</y>
+      <width>640</width>
+      <height>480</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Box</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1330</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSet_ROI">
+    <property name="title">
+     <string>Set ROI</string>
+    </property>
+    <addaction name="actionPeople_ROI_1"/>
+    <addaction name="actionThing_ROI"/>
+    <addaction name="actionPeople_ROI_2"/>
+    <addaction name="actionHand_ROI_1"/>
+    <addaction name="actionHand_ROI_2"/>
+   </widget>
+   <widget class="QMenu" name="menuRead_Parameter">
+    <property name="title">
+     <string>Read Paras</string>
+    </property>
+    <addaction name="actionLoad_all_parameter"/>
+    <addaction name="actionLoad_cam1"/>
+    <addaction name="actionLoad_cam2"/>
+    <addaction name="actionLoad_cam3"/>
+    <addaction name="actionLoad_cam4"/>
+   </widget>
+   <widget class="QMenu" name="menuShow">
+    <property name="title">
+     <string>Draw</string>
+    </property>
+    <widget class="QMenu" name="menuDrawID">
+     <property name="title">
+      <string>drawID</string>
+     </property>
+     <addaction name="actionDrawIDYes"/>
+     <addaction name="actionDrawIDNo"/>
+    </widget>
+    <widget class="QMenu" name="menuDrawSkeleton">
+     <property name="title">
+      <string>drawSkeleton</string>
+     </property>
+     <addaction name="actionDrawSkeletonYes"/>
+     <addaction name="actionDrawSkeletonNo"/>
+    </widget>
+    <widget class="QMenu" name="menuDrawTrajectory">
+     <property name="title">
+      <string>drawTrajectory</string>
+     </property>
+     <addaction name="actiontrajectory_Yes"/>
+     <addaction name="actiontrajectory_No"/>
+    </widget>
+    <widget class="QMenu" name="menuDrawBox">
+     <property name="title">
+      <string>drawBox</string>
+     </property>
+     <addaction name="actionDrawBoxYes"/>
+     <addaction name="actionDrawBoxNo"/>
+    </widget>
+    <addaction name="menuDrawTrajectory"/>
+    <addaction name="menuDrawSkeleton"/>
+    <addaction name="menuDrawID"/>
+    <addaction name="menuDrawBox"/>
+   </widget>
+   <widget class="QMenu" name="menuStop">
+    <property name="title">
+     <string>Stop</string>
+    </property>
+    <addaction name="actionStop_cam1"/>
+    <addaction name="actionStop_cam2"/>
+    <addaction name="actionStop_cam3"/>
+    <addaction name="actionStop_cam4"/>
+   </widget>
+   <widget class="QMenu" name="menuStart">
+    <property name="title">
+     <string>Start</string>
+    </property>
+    <addaction name="actionStart_cam1"/>
+    <addaction name="actionStart_cam2"/>
+    <addaction name="actionStart_cam3"/>
+    <addaction name="actionStart_cam4"/>
+   </widget>
+   <addaction name="menuSet_ROI"/>
+   <addaction name="menuRead_Parameter"/>
+   <addaction name="menuShow"/>
+   <addaction name="menuStop"/>
+   <addaction name="menuStart"/>
+  </widget>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionPeople_ROI_1">
+   <property name="text">
+    <string>People ROI 1 </string>
+   </property>
+  </action>
+  <action name="actionThing_ROI">
+   <property name="text">
+    <string>Thing ROI</string>
+   </property>
+  </action>
+  <action name="actionPeople_ROI_2">
+   <property name="text">
+    <string>People ROI 2</string>
+   </property>
+  </action>
+  <action name="actionHand_ROI_1">
+   <property name="text">
+    <string>Hand ROI 1</string>
+   </property>
+  </action>
+  <action name="actionHand_ROI_2">
+   <property name="text">
+    <string>Hand ROI 2</string>
+   </property>
+  </action>
+  <action name="actionLoad_all_parameter">
+   <property name="text">
+    <string>load_all_parameter</string>
+   </property>
+  </action>
+  <action name="actionLoad_cam1">
+   <property name="text">
+    <string>load_cam1</string>
+   </property>
+  </action>
+  <action name="actionLoad_cam2">
+   <property name="text">
+    <string>load_cam2</string>
+   </property>
+  </action>
+  <action name="actionLoad_cam3">
+   <property name="text">
+    <string>load_cam3</string>
+   </property>
+  </action>
+  <action name="actionLoad_cam4">
+   <property name="text">
+    <string>load_cam4</string>
+   </property>
+  </action>
+  <action name="actionDrawIDYes">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>yes</string>
+   </property>
+  </action>
+  <action name="actionDrawIDNo">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>no</string>
+   </property>
+  </action>
+  <action name="actionDrawSkeletonYes">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>yes</string>
+   </property>
+  </action>
+  <action name="actionDrawSkeletonNo">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>no</string>
+   </property>
+  </action>
+  <action name="actiontrajectory_Yes">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>yes</string>
+   </property>
+  </action>
+  <action name="actiontrajectory_No">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>no</string>
+   </property>
+  </action>
+  <action name="actionStop_cam1">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>stop_cam1</string>
+   </property>
+  </action>
+  <action name="actionStop_cam2">
+   <property name="text">
+    <string>stop_cam2</string>
+   </property>
+  </action>
+  <action name="actionStop_cam3">
+   <property name="text">
+    <string>stop_cam3</string>
+   </property>
+  </action>
+  <action name="actionStop_cam4">
+   <property name="text">
+    <string>stop_cam4</string>
+   </property>
+  </action>
+  <action name="actionStart_cam1">
+   <property name="text">
+    <string>start_cam1</string>
+   </property>
+  </action>
+  <action name="actionStart_cam2">
+   <property name="text">
+    <string>start_cam2</string>
+   </property>
+  </action>
+  <action name="actionStart_cam3">
+   <property name="text">
+    <string>start_cam3</string>
+   </property>
+  </action>
+  <action name="actionStart_cam4">
+   <property name="text">
+    <string>start_cam4</string>
+   </property>
+  </action>
+  <action name="actionDrawBoxYes">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>yes</string>
+   </property>
+  </action>
+  <action name="actionDrawBoxNo">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>no</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>
