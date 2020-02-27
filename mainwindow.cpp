@@ -28,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent) :
     Dlg_4 = new Dialog_4;
     Dlg_5 = new Dialog_5;
     
-    cout<<"hello"<< hlg::ui_mainwindow_cam1_start_flag<<endl;
+    // cout<<"hello"<< hlg::ui_mainwindow_cam1_start_flag<<endl;
     ui->actiontrajectory_No->setEnabled(draw_trajectory_flag);//行人轨迹标志初始化
     ui->actiontrajectory_Yes->setEnabled(!draw_trajectory_flag);
     ui->actionDrawSkeletonNo->setEnabled(drawSkeleton_flag);//画骨架标志位初始化

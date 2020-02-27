@@ -6,7 +6,7 @@ set( CMAKE_AUTOMOC ON )
 set( CMAKE_BUILD_TYPE Release )
 
 
-add_definitions ( -Wall )
+add_definitions ( -Wall -g )
 find_package ( Qt5Widgets REQUIRED )
 find_package ( Qt5Core REQUIRED )
 find_package ( Qt5Gui REQUIRED )
@@ -19,6 +19,9 @@ find_package ( Qt5Gui REQUIRED )
 
 #                       OpenCV_VERSION：${OpenCV_VERSION}")
 #message(STATUS "OpenCV_DIR:${Boost_DIR}")
+#message(STATUS "CMAKE_MODULE_PATH:${CMAKE_MODULE_PATH}+++")
+#message(STATUS "OpenCV_DIR:${OpenCV_DIR}+++")
+#message(STATUS "Boost_DIR:${Boost_DIR}+++")
 find_package( OpenCV  REQUIRED)
 find_package(Boost REQUIRED)   #要使用的boost库
 
@@ -69,18 +72,30 @@ QT5_WRAP_CPP(MOCS ${test2_MOCS})
 add_subdirectory(read_parameter)
 add_subdirectory(munkres)
 add_subdirectory(kalman_track)
+add_subdirectory(thing_retention)
 
 
+
+message(STATUS "thing_retention_src:${thing_retention_src}+++")
+message(STATUS "TRS:${TRS}+++")
+message(STATUS "MOCS:${MOCS}+++")
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+  message(STATUS "dir='${dir}'+++")
+endforeach()
 
 add_executable ( test2 ${test2_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
 target_link_libraries ( test2 PUBLIC
     -Wl,--start-group
     read_parameter
     kalman_track
+    #${CMAKE_CURRENT_SOURCE_DIR}/libthing_retention.a
+    thing_retention
     munkres
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets
+    
     ${OpenCV_LIBS}
     ${Boost_LIBS}
     -Wl,--end-group

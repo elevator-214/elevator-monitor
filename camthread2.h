@@ -16,13 +16,7 @@ using namespace cv;
 
 
 
-extern bool load_cam2_flag;
-extern int value_pp2_x;
-extern int value_pp2_y;
-extern int value_pp2_width;
-extern int value_pp2_height;
 
-extern bool SetRoi_pp2_flag;
 
 class CamThread2 : public QThread
 {

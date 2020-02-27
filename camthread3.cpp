@@ -2,6 +2,28 @@
 bool cam3_hdDrail=false;
 bool no_camera3=false;
 extern bool cam3_start_flag;
+extern bool load_cam3_flag;
+extern int value_hd1_x;
+extern int value_hd1_y;
+extern int value_hd1_width;
+extern int value_hd1_height;
+extern int value_hd1_p1_in_x;
+extern int value_hd1_p1_in_y;
+extern int value_hd1_p2_in_x;
+extern int value_hd1_p2_in_y;
+extern int value_hd1_p3_in_x;
+extern int value_hd1_p3_in_y;
+extern int value_hd1_p4_in_x;
+extern int value_hd1_p4_in_y;
+extern int value_hd1_p1_out_x;
+extern int value_hd1_p1_out_y;
+extern int value_hd1_p2_out_x;
+extern int value_hd1_p2_out_y;
+extern int value_hd1_p3_out_x;
+extern int value_hd1_p3_out_y;
+extern int value_hd1_p4_out_x;
+extern int value_hd1_p4_out_y;
+extern bool SetRoi_hd1_flag;
 CamThread3 :: CamThread3()
 {
     CAMERA_WIDTH = hlg::cam3_CAMERA_WIDTH;

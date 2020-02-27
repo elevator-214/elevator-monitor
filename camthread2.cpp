@@ -8,6 +8,13 @@ bool src2Ready = false;//cam4标志位
 bool cam2_ppCount=false;
 bool no_camera2=false;
 
+extern bool load_cam2_flag;
+extern int value_pp2_x;
+extern int value_pp2_y;
+extern int value_pp2_width;
+extern int value_pp2_height;
+
+extern bool SetRoi_pp2_flag;
 extern bool draw_trajectory_flag;//是否画行人轨迹标志位
 extern bool drawSkeleton_flag;//是否画骨架标志位
 extern bool drawID_flag;//是否画id标志位
@@ -132,7 +139,7 @@ void CamThread2 :: run()
                 while(!cam2_start_flag)
                 {
                     QThread::msleep(1000);
-                    cout<<"hello"<<endl;
+                    // cout<<"hello"<<endl;
                 }
 
             }

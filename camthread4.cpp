@@ -3,6 +3,28 @@
 extern Mat src2;
 extern bool src2Ready;
 extern bool cam4_start_flag;
+extern bool load_cam4_flag;
+extern int value_hd2_x;
+extern int value_hd2_y;
+extern int value_hd2_width;
+extern int value_hd2_height;
+extern int value_hd2_p1_in_x;
+extern int value_hd2_p1_in_y;
+extern int value_hd2_p2_in_x;
+extern int value_hd2_p2_in_y;
+extern int value_hd2_p3_in_x;
+extern int value_hd2_p3_in_y;
+extern int value_hd2_p4_in_x;
+extern int value_hd2_p4_in_y;
+extern int value_hd2_p1_out_x;
+extern int value_hd2_p1_out_y;
+extern int value_hd2_p2_out_x;
+extern int value_hd2_p2_out_y;
+extern int value_hd2_p3_out_x;
+extern int value_hd2_p3_out_y;
+extern int value_hd2_p4_out_x;
+extern int value_hd2_p4_out_y;
+extern bool SetRoi_hd2_flag;
 bool cam4_hdDrail=false;
 CamThread4 :: CamThread4()
 {
@@ -92,7 +114,7 @@ void CamThread4 :: run()
             while(!cam4_start_flag)
             {
                 QThread::msleep(1000);
-                cout<<"hello"<<endl;
+                // cout<<"hello"<<endl;
             }
 
         }

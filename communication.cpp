@@ -1,6 +1,19 @@
 #include "communication.h"
 
+extern bool cam1_ppCount;
+extern bool cam1_ppRetent;
+extern bool cam1_thRetent;
+extern int cam1_ppFlow30s;
 
+extern bool cam2_ppCount;
+
+extern bool cam3_hdDrail;
+
+extern bool cam4_hdDrail;
+
+extern bool no_camera1;
+extern bool no_camera2;
+extern bool no_camera3;
 
 Communication :: Communication()
 {

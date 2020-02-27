@@ -1,11 +1,28 @@
 #include "camthread1.h"
+
 bool cam1_ppCount=false;
 bool cam1_ppRetent=false;
 bool cam1_thRetent=false;
 bool no_camera1=false;
 int cam1_ppFlow30s=0;
 
+extern bool load_cam1_flag;
 
+extern int value_pp1_x;
+extern int value_pp1_y;
+extern int value_pp1_width;
+extern int value_pp1_height;
+extern int value_pp1_flowline;
+
+
+extern bool SetRoi_pp1_flag;
+extern int value_th_x;
+extern int value_th_y;
+extern int value_th_width;
+extern int value_th_height;
+extern bool SetRoi_th_flag;
+
+extern bool cam1_start_flag;
 
 CamThread1 :: CamThread1()
 {
@@ -53,16 +70,6 @@ CamThread1 :: ~CamThread1()
 
 void CamThread1 :: run()
 {
-//    while(true);
-//    while(true)
-//    {
-//        if(SetRoi_pp1_flag)
-//        {cout<<"cam1"<<endl;
-//         SetRoi_pp1_flag=false;
-//        }
-
-
-//    }
     //取一些参数的地址,下面保存参数和加载参数的时候要用到.
     const int cam1_paras_pp_num=5;
     int *cam1_pp_paras[cam1_paras_pp_num*2]={&(ppROI.x),&(ppROI.y),&(ppROI.width),&(ppROI.height),(&ppFlowLine),
@@ -91,8 +98,6 @@ void CamThread1 :: run()
     /*  People Patameters	*/
     /************************/
     /*加载yolo参数*/
-
-
     std::vector<std::string> class_names;
     {
         std::ifstream class_file("./yolov3/classes.txt");
@@ -114,36 +119,14 @@ void CamThread1 :: run()
     /*加载yolo参数end*/
 
 
-    //Tracking
+    //楼层板人头Tracking
     PeopleKalmanTracker ppTracker(60, "pp");
-
-    //Judgement
+    //客流量以及滞留行为judgement
     const unsigned int ppRetent_T = 60;//滞留判断帧数
     int ppFlowIn30s_last = 0;
     int ppFlowOut30s_last = 0;
     int ppFlowIn30s_inc = 0;
     int ppFlowOut30s_inc = 0;
-
-    /************************/
-    /*  Thing Patameters	*/
-    /************************/
-    //Foreground
-    Mat dstBg;
-    const double bgLearnRate = 0.01;
-    const int bgBinThresh = 25;
-    int thRetent_inc = 0;
-    int thZeroCount_inc = 0;
-
-    //Detection
-    const float ellipPro = 3.f;
-    const int ellipSL = 40 * 40;
-    const int ellipSH = CAMERA_WIDTH * CAMERA_HEIGHT / 3;
-
-    //Tracking
-    ThingKalmanTracker thTracker(60, "th");
-
-    //Judgement
-    const float thRetent_T = 2000;
 
     /*  开启两个线程,加快算法处理速度	*/
     const int channel_size=2;//缓冲区大小
@@ -183,7 +166,8 @@ void CamThread1 :: run()
             }
 //            auto total_start = std::chrono::steady_clock::now();
             ch.put(img);
-//            std::this_thread::sleep_for(150ms);
+            // cout<<"puting!"<<endl;
+           //std::this_thread::sleep_for(150ms);
 //            auto total_end = std::chrono::steady_clock::now();
 //            float cost_ms=std::chrono::duration_cast<std::chrono::milliseconds>(total_end - total_start).count();
 //            std::cout<<cost_ms<<"ms"<<std::endl;
@@ -196,9 +180,19 @@ void CamThread1 :: run()
         constexpr float confidence_threshold = 0.7;
         constexpr float nms_threshold = 0.1;
         constexpr int num_classes = 80;
-
+        /************************/
+        /*  Thing Patameters	*/
+        /************************/
+        //物体的前景提取，跟踪，以及滞留判断
+        hlg::ThingInterface thing_interface;
+        thing_interface.create_ForeExtraction(capture.get(CAP_PROP_FRAME_HEIGHT), capture.get(CAP_PROP_FRAME_WIDTH), false);
+        thing_interface.create_Thingdetector();
+        thing_interface.create_Thingtracker();
+        cv::Mat th_image, foregroundMask;
+        const int retention_frame_threshold = 60;//滞留帧数阈值
         while(true)
         {
+            
             src=ch.get();
             double fps = (double)getTickCount();
             dst = src.clone();
@@ -274,9 +268,7 @@ void CamThread1 :: run()
                 outfile.close();
 
                 SetRoi_th_flag = false;
-                dstBg.release();
-                if (dstBg.empty())
-                    cerr<<"release is ok"<<endl ;
+                
             }
             //加载cam1的各种ROI参数
             if(load_cam1_flag)
@@ -300,29 +292,28 @@ void CamThread1 :: run()
                         *cam1_pp_paras[i]=*cam1_pp_paras[i+cam1_paras_pp_num]=load_nums_pp[i];
                     for(int i=0;i<cam1_paras_th_num;i++)
                         *cam1_th_paras[i]=*cam1_th_paras[i+cam1_paras_th_num]=load_nums_th[i];
-                    dstBg.release();
-                    if (dstBg.empty())
-                        cerr<<"release is ok"<<endl ;
+                    
                 }
             }
             /*画出ROI*/
             rectangle(dst, ppROI, Scalar(255, 255, 0), 1);
             line(dst, Point(ppROI.x, ppFlowLine), Point(ppROI.x + ppROI.width, ppFlowLine), Scalar(255, 255, 0), 1);
             rectangle(dst, thROI, Scalar(0, 255, 255), 1);
+        
             //yolo检测人头
-            cv::Mat frame=src(ppROI);
+            cv::Mat yolo_image=src(ppROI);
             if(print_yolo_width_height_flag)
             {
                 print_yolo_width_height_flag=false;
-                if(frame.rows>frame.cols)
+                if(yolo_image.rows>yolo_image.cols)
                 {
-                    unsigned int suggest_height=round(7.0*frame.rows/frame.cols)*32;
+                    unsigned int suggest_height=round(7.0*yolo_image.rows/yolo_image.cols)*32;
                     if(yolo_width!=224||yolo_height!=suggest_height)
                         cout<<"建议yolo_width:224"<<" 建议yolo_height:"<<suggest_height<<endl;
                 }
                 else
                 {
-                    unsigned int suggest_width=round(7.0*frame.cols/frame.rows)*32;
+                    unsigned int suggest_width=round(7.0*yolo_image.cols/yolo_image.rows)*32;
                     if(yolo_height!=224||yolo_width!=suggest_width)
                         cout<<"建议yolo_width:"<<suggest_width<<" 建议yolo_height:224"<<endl;
                 }
@@ -330,7 +321,7 @@ void CamThread1 :: run()
 
             //由于训练的时候,图像尺寸为较小.为了迎合训练图片,达到较好的检测效果,且ROI也接近1:1,因此把图片缩小到224*224
 //            cv::dnn::blobFromImage(frame, blob, 0.00392, cv::Size(288, 224), cv::Scalar(), true, false, CV_32F);
-            cv::dnn::blobFromImage(frame, blob, 0.00392, cv::Size(yolo_width, yolo_height), cv::Scalar(), true, false, CV_32F);
+            cv::dnn::blobFromImage(yolo_image, blob, 0.00392, cv::Size(yolo_width, yolo_height), cv::Scalar(), true, false, CV_32F);
             net.setInput(blob);
 
 //            auto dnn_start = std::chrono::steady_clock::now();
@@ -340,7 +331,7 @@ void CamThread1 :: run()
             std::vector<cv::Rect> boxes;
             std::vector<int> class_id;
             std::vector<float> scores;
-            for (auto& output : detections)
+            for (const auto& output : detections)
             {
                 const auto num_boxes = output.rows;
                 for (size_t i = 0; i < num_boxes; i++)
@@ -350,11 +341,11 @@ void CamThread1 :: run()
                     auto classid = itr - output.ptr<float>(i, 5);
                     if (confidence >= confidence_threshold&&classid==0)//只显示行人类
                     {
-                        auto x = output.at<float>(i, 0) * frame.cols;
-                        auto y = output.at<float>(i, 1) * frame.rows;
-                        auto width = output.at<float>(i, 2) * frame.cols;
-                        auto height = output.at<float>(i, 3) * frame.rows;
-                        cv::Rect rect(x - width/2, y - height/2, width, height);
+                        const auto &x = output.at<float>(i, 0) * yolo_image.cols;
+                        const auto &y = output.at<float>(i, 1) * yolo_image.rows;
+                        const auto &width = output.at<float>(i, 2) * yolo_image.cols;
+                        const auto &height = output.at<float>(i, 3) * yolo_image.rows;
+                        const cv::Rect rect(x - width/2, y - height/2, width, height);
                         boxes.push_back(rect);
                         class_id.push_back(classid);
                         scores.push_back(confidence);
@@ -391,6 +382,8 @@ void CamThread1 :: run()
             ppCount = ppTracker.target.size();	//count
 
             //滞留判断 画不同颜色矩形框
+            static vector<Rect>people_boxes;//存储行人框，用于后面过滤大件物体
+            people_boxes.resize(ppCount);
             for (int i = 0; i < ppCount; i++)
             {
                 //retention
@@ -398,6 +391,7 @@ void CamThread1 :: run()
                 string sid;
                 ssid << ppTracker.target[i].id;
                 ssid >> sid;
+                people_boxes[i]=ppTracker.target[i].box;
                 if (ppTracker.target[i].track_frame > ppRetent_T)
                 {
                     Rect box=Rect(int(ppTracker.target[i].position().x-(ppTracker.target[i].box.width)/2),int(ppTracker.target[i].position().y-(ppTracker.target[i].box.height)/2),ppTracker.target[i].box.width,ppTracker.target[i].box.height);
@@ -432,94 +426,57 @@ void CamThread1 :: run()
             /*  Thing Monitoring 大件物品滞留检测	*/
             /************************/
             //Foreground
-            Mat srcGray, dstBg_8U, dstFg_Gray, dstFg;
-            cv::cvtColor(src(thROI), srcGray, cv::COLOR_BGR2GRAY);
-
-            if (dstBg.empty())
-                srcGray.convertTo(dstBg, CV_32F);
-
-            dstBg.convertTo(dstBg_8U, CV_8U);
-            cv::absdiff(dstBg_8U, srcGray, dstFg_Gray);
-            cv::threshold(dstFg_Gray, dstFg, bgBinThresh, 255, THRESH_BINARY_INV);
-
-            //Background
-            if (thRetent)
-                thRetent_inc++;
-            else
-                thRetent_inc = 0;
-
-            if (!thTracker.count)
-                thZeroCount_inc++;
-            else
-                thZeroCount_inc = 0;
-
-            if (thRetent_inc > fmMinue / 4 || thZeroCount_inc > 10)
-            {
-                Mat element = getStructuringElement(MORPH_RECT, Size(3, 3));
-                dilate(dstFg, dstFg, element);
-                accumulateWeighted(srcGray, dstBg, 5 * bgLearnRate, dstFg);
-            }
-            else
-                accumulateWeighted(srcGray, dstBg, bgLearnRate, dstFg);
-//            cv::imshow("fore",dstFg);
-//            cv::waitKey(1);
-            bitwise_not(dstFg, dstFg);
-
-            //Detection
-            vector<Point2f> thDetection;
-            vector<vector<Point> > contours = liSegmentFGMask(dstFg);
-            //画出前景查看效果
-//            cv::imshow("fore",dstFg);
-//            cv::waitKey(1);
-//            cv::imshow("backg",dstBg);
-//            cv::imshow("fore",dstFg);
-            for (int i = 0; i < contours.size(); i++)
-            {
-                if (contours[i].size() > 6)
-                {
-                    RotatedRect ellip = fitEllipse(contours[i]);
-                    int width = max(ellip.size.width, ellip.size.height);
-                    int height = min(ellip.size.width, ellip.size.height);
-                    if (width < height * ellipPro && width * height > ellipSL && width * height < ellipSH)
-                        thDetection.push_back(Point2f(ellip.center.x + thROI.x, ellip.center.y + thROI.y));
-                }
-            }
-            /*for (int i = 0; i < thDetection.size(); i++)
-                rectangle(dst, Point(thDetection[i].x - 30, thDetection[i].y - 30), Point(thDetection[i].x + 30, thDetection[i].y + 30), Scalar(0, 0, 255), 1);*/
-
-            //Measurement  对大件物品检测结果进行修正,这个函数感觉需要根据实际检测结果修改---HLG
-            vector<Point2f> thMeasurement = liCorrectThDetection(thDetection, thTracker.trackment(), thROI, 2 * thTracker.size, 1 * thTracker.size);
-            /*for (int i = 0; i < thMeasurement.size(); i++)
-                circle(dst, thMeasurement[i], 30, Scalar(0, 0, 255), 1);*/
-
-            //Tracking 大件物品卡尔曼滤波修正位置
-            thTracker.track(thMeasurement);
-            //thTracker.print(fmCurrent);
-            //thTracker.show(src, 1);
-
-            /*大件物品滞留判断*/
             thRetent = false;
-            cam1_thRetent=false;
-            for (int i = 0; i < thTracker.target.size(); i++)
-            {
-                //retention
-                stringstream ssid;
-                string sid;
-                ssid << thTracker.target[i].id;
-                ssid >> sid;
-                if (thTracker.target[i].confidence > thRetent_T)
+            cam1_thRetent=false;//与电梯控制器通信
+            th_image=src.clone();
+
+
+            if (thing_interface.fore_ExtractFore(th_image, foregroundMask))//提取前景
+            {                    
+                thing_interface.detect_ThingsDetect(foregroundMask);//从前景中提取出大件物体           
+                static once_flag SetOutputCoordScale_flag;//由于在提取的时候，尺寸是固定的，因此输出的坐标需要进行尺度转换
+                auto SetOutputCoordScale_fun= std::bind(&hlg::ThingInterface::detect_SetOutputCoordScale, std::ref(thing_interface), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);//std::ref：为了只析构1次
+                std::call_once(SetOutputCoordScale_flag, SetOutputCoordScale_fun, capture.get(CAP_PROP_FRAME_HEIGHT), capture.get(CAP_PROP_FRAME_WIDTH), thing_interface.fore_getScaledSize());
+                static vector<Rect>Thing_Detected;
+                thing_interface.detect_Get_Thing_Result(Thing_Detected, people_boxes,thROI);//滤除行人，并进行尺度变换
+                thing_interface.track(Thing_Detected);
+                // cout << "main time:" << double(clock() - start_time) / CLOCKS_PER_SEC << endl;
+                //total_time += clock() - start_time;
+                const vector<vector<int>>&tracking_result = thing_interface.track_GetThingsInfo();
+                //滞留检测 画图像
+                for (int i = 0; i < tracking_result.size(); ++i)
                 {
-                    rectangle(dst, Point(thTracker.target[i].position().x - 30, thTracker.target[i].position().y - 30), Point(thTracker.target[i].position().x + 30, thTracker.target[i].position().y + 30), Scalar(0, 0, 255), 2);
-                    putText(dst, sid, thTracker.target[i].position(), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2);
-                    thRetent = true;
-                    cam1_thRetent=true;
+                    const int x1 = max(tracking_result[i][0], thROI.x);
+                    const int y1 = max(tracking_result[i][1], thROI.y);
+                    const int x3 = min(tracking_result[i][2], thROI.x+thROI.width-1);
+                    const int y3 = min(tracking_result[i][3], thROI.y + thROI.height - 1);
+                    const int &track_frame = tracking_result[i][4];
+                    const int &id = tracking_result[i][5];
+                    stringstream ssid;
+                    string sid;
+                    ssid << id;
+                    ssid >> sid;
+                    if (track_frame > retention_frame_threshold)
+                    {//达到滞留帧数阈值，用红色画框,否则用品红色画框
+                        cv::rectangle(dst, Point(x1, y1),
+                            Point(x3, y3),
+                            cv::Scalar(0, 0, 255));
+                        putText(dst, sid,cv::Point((x1+x3)/2,(y1+y3)/2), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 1);
+                        thRetent = true;
+                        cam1_thRetent=true;
+                    }
+                    else
+                    {
+                        cv::rectangle(dst, Point(x1, y1),
+                            Point(x3, y3),
+                            cv::Scalar(255, 0, 255));
+                        putText(dst, sid, cv::Point((x1+x3)/2,(y1+y3)/2), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 0, 255), 1);
+                    }                   
                 }
-                else
-                {
-                    rectangle(dst, Point(thTracker.target[i].position().x - 30, thTracker.target[i].position().y - 30), Point(thTracker.target[i].position().x + 30, thTracker.target[i].position().y + 30), Scalar(0, 255, 255), 1);
-                    putText(dst, sid, thTracker.target[i].position(), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 255), 1);
-                }
+
             }
+
+
             //dst  将检测结果发送给QT
             cv::Mat QT_img;
             cv::resize(dst,QT_img,Size(640,480));//把QT图像归一化到固定大小

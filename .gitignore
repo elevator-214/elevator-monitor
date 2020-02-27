@@ -1,14 +1,17 @@
-#c++库
-*.so
-*.o
+*
+!*/
+!.gitignore
+!*.so
+!*.a
+!*.cpp
+!*.h
+!*.ui
+!*.py
+!*.py
+!*.txt
+!*.md
 
-build/*
-debug/*
-release/*
-classifier/*
 
-#yolo file
-*.weights
 
 
 
