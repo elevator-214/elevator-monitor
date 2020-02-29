@@ -24,7 +24,16 @@ find_package ( Qt5Gui REQUIRED )
 #message(STATUS "OpenCV_DIR:${OpenCV_DIR}+++")
 #message(STATUS "Boost_DIR:${Boost_DIR}+++")
 find_package( OpenCV  REQUIRED)
+find_package(CUDA REQUIRED)
+include_directories(${CUDA_INCLUDE_DIRS})
 find_package(Boost REQUIRED)   #要使用的boost库
+
+include_directories(tiny-tensorrt)
+link_directories(/usr/lib/aarch64-linux-gnu)
+link_directories(lib/)
+find_library(CUDART cudart HINTS /usr/local/cuda/targets/aarch64-linux/lib/)
+
+
 
 set ( test2_HDRS
         channel.h
@@ -74,7 +83,8 @@ add_subdirectory(read_parameter)
 add_subdirectory(munkres)
 add_subdirectory(kalman_track)
 add_subdirectory(thing_retention)
-
+add_subdirectory(tiny-tensorrt)
+add_subdirectory(openpose)
 
 
 message(STATUS "thing_retention_src:${thing_retention_src}+++")
@@ -93,6 +103,7 @@ target_link_libraries ( test2 PUBLIC
     #${CMAKE_CURRENT_SOURCE_DIR}/libthing_retention.a
     thing_retention
     munkres
+    openpose
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets

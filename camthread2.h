@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QImage>
 #include <iostream>
+#include <string>
 #include<fstream>
 #include<read_para.h>
 #include "myFunction.h"

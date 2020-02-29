@@ -20,3 +20,15 @@
 /home/nvidia/hlg/cmake_code/build/thing_retention/CMakeFiles/thing_retention.dir
 /home/nvidia/hlg/cmake_code/build/thing_retention/CMakeFiles/edit_cache.dir
 /home/nvidia/hlg/cmake_code/build/thing_retention/CMakeFiles/thing_retention_autogen.dir
+/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/rebuild_cache.dir
+/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/edit_cache.dir
+/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/tinytrt.dir
+/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/pytrt.dir
+/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/tinytrt_autogen.dir
+/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/pytrt_autogen.dir
+/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/pybind11/CMakeFiles/rebuild_cache.dir
+/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/pybind11/CMakeFiles/edit_cache.dir
+/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/rebuild_cache.dir
+/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/openpose.dir
+/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/edit_cache.dir
+/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/openpose_autogen.dir

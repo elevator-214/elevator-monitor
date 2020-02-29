@@ -14,6 +14,9 @@
 # EXTERNAL cache entries
 ########################
 
+//compile python api
+BUILD_PYTHON:BOOL=ON
+
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=Boost_DIR-NOTFOUND
 
@@ -129,8 +132,56 @@ CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=OFF
 //ON
 CMAKE_FIND_DEBUG_MODE:BOOL=ON
 
+//User executables (bin)
+CMAKE_INSTALL_BINDIR:PATH=bin
+
+//Read-only architecture-independent data (DATAROOTDIR)
+CMAKE_INSTALL_DATADIR:PATH=
+
+//Read-only architecture-independent data root (share)
+CMAKE_INSTALL_DATAROOTDIR:PATH=share
+
+//Documentation root (DATAROOTDIR/doc/PROJECT_NAME)
+CMAKE_INSTALL_DOCDIR:PATH=
+
+//C header files (include)
+CMAKE_INSTALL_INCLUDEDIR:PATH=include
+
+//Info documentation (DATAROOTDIR/info)
+CMAKE_INSTALL_INFODIR:PATH=
+
+//Object code libraries (lib)
+CMAKE_INSTALL_LIBDIR:PATH=lib
+
+//Program executables (libexec)
+CMAKE_INSTALL_LIBEXECDIR:PATH=libexec
+
+//Locale-dependent data (DATAROOTDIR/locale)
+CMAKE_INSTALL_LOCALEDIR:PATH=
+
+//Modifiable single-machine data (var)
+CMAKE_INSTALL_LOCALSTATEDIR:PATH=var
+
+//Man documentation (DATAROOTDIR/man)
+CMAKE_INSTALL_MANDIR:PATH=
+
+//C header files for non-gcc (/usr/include)
+CMAKE_INSTALL_OLDINCLUDEDIR:PATH=/usr/include
+
 //Install path prefix, prepended onto install directories.
 CMAKE_INSTALL_PREFIX:PATH=/usr/local
+
+//Run-time variable data (LOCALSTATEDIR/run)
+CMAKE_INSTALL_RUNSTATEDIR:PATH=
+
+//System admin executables (sbin)
+CMAKE_INSTALL_SBINDIR:PATH=sbin
+
+//Modifiable architecture-independent data (com)
+CMAKE_INSTALL_SHAREDSTATEDIR:PATH=com
+
+//Read-only single-machine data (etc)
+CMAKE_INSTALL_SYSCONFDIR:PATH=etc
 
 //Path to a program.
 CMAKE_LINKER:FILEPATH=/usr/bin/ld
@@ -214,8 +265,170 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 // Studio IDE projects all commands are done without /nologo.
 CMAKE_VERBOSE_MAKEFILE:BOOL=OFF
 
+//Path to a library.
+CUDART:FILEPATH=/usr/local/cuda/targets/aarch64-linux/lib/libcudart.so
+
+//Compile device code in 64 bit mode
+CUDA_64_BIT_DEVICE_CODE:BOOL=ON
+
+//Attach the build rule to the CUDA source file.  Enable only when
+// the CUDA source file is added to at most one target.
+CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE:BOOL=ON
+
+//Generate and parse .cubin files in Device mode.
+CUDA_BUILD_CUBIN:BOOL=OFF
+
+//Build in Emulation mode
+CUDA_BUILD_EMULATION:BOOL=OFF
+
+//"cudart" library
+CUDA_CUDART_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libcudart.so
+
+//"cuda" library (older versions only).
+CUDA_CUDA_LIBRARY:FILEPATH=/usr/lib/aarch64-linux-gnu/libcuda.so
+
+//Directory to put all the output files.  If blank it will default
+// to the CMAKE_CURRENT_BINARY_DIR
+CUDA_GENERATED_OUTPUT_DIR:PATH=
+
+//Generated file extension
+CUDA_HOST_COMPILATION_CPP:BOOL=ON
+
+//Host side compiler used by NVCC
+CUDA_HOST_COMPILER:FILEPATH=/usr/bin/cc
+
+//Path to a program.
+CUDA_NVCC_EXECUTABLE:FILEPATH=/usr/local/cuda-10.0/bin/nvcc
+
+//Semi-colon delimit multiple arguments.
+CUDA_NVCC_FLAGS:STRING=
+
+//Semi-colon delimit multiple arguments.
+CUDA_NVCC_FLAGS_DEBUG:STRING=
+
+//Semi-colon delimit multiple arguments.
+CUDA_NVCC_FLAGS_MINSIZEREL:STRING=
+
+//Semi-colon delimit multiple arguments.
+CUDA_NVCC_FLAGS_RELEASE:STRING=
+
+//Semi-colon delimit multiple arguments.
+CUDA_NVCC_FLAGS_RELWITHDEBINFO:STRING=
+
+//Propage C/CXX_FLAGS and friends to the host compiler via -Xcompile
+CUDA_PROPAGATE_HOST_FLAGS:BOOL=ON
+
+//Path to a file.
+CUDA_SDK_ROOT_DIR:PATH=CUDA_SDK_ROOT_DIR-NOTFOUND
+
+//Compile CUDA objects with separable compilation enabled.  Requires
+// CUDA 5.0+
+CUDA_SEPARABLE_COMPILATION:BOOL=OFF
+
+//List of target CUDA architectures
+CUDA_TARGET_ARCHS:STRING=72
+
+//Path to a file.
+CUDA_TOOLKIT_INCLUDE:PATH=/usr/local/cuda-10.0/include
+
+//Toolkit location.
+CUDA_TOOLKIT_ROOT_DIR:PATH=/usr/local/cuda-10.0
+
+//Use the static version of the CUDA runtime library if available
+CUDA_USE_STATIC_CUDA_RUNTIME:BOOL=ON
+
+//Print out the commands run while compiling the CUDA source file.
+//  With the Makefile generator this defaults to VERBOSE variable
+// specified on the command line, but can be forced on with this
+// option.
+CUDA_VERBOSE_BUILD:BOOL=OFF
+
+//Version of CUDA as computed from nvcc.
+CUDA_VERSION:STRING=10.0
+
+//"cublas" library
+CUDA_cublas_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libcublas.so
+
+//"cublas_device" library
+CUDA_cublas_device_LIBRARY:FILEPATH=CUDA_cublas_device_LIBRARY-NOTFOUND
+
+//"cudadevrt" library
+CUDA_cudadevrt_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libcudadevrt.a
+
+//static CUDA runtime library
+CUDA_cudart_static_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libcudart_static.a
+
+//"cufft" library
+CUDA_cufft_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libcufft.so
+
+//"cupti" library
+CUDA_cupti_LIBRARY:FILEPATH=/usr/local/cuda-10.0/extras/CUPTI/lib64/libcupti.so
+
+//"curand" library
+CUDA_curand_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libcurand.so
+
+//"cusolver" library
+CUDA_cusolver_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libcusolver.so
+
+//"cusparse" library
+CUDA_cusparse_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libcusparse.so
+
+//"nppc" library
+CUDA_nppc_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppc.so
+
+//"nppial" library
+CUDA_nppial_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppial.so
+
+//"nppicc" library
+CUDA_nppicc_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppicc.so
+
+//"nppicom" library
+CUDA_nppicom_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppicom.so
+
+//"nppidei" library
+CUDA_nppidei_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppidei.so
+
+//"nppif" library
+CUDA_nppif_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppif.so
+
+//"nppig" library
+CUDA_nppig_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppig.so
+
+//"nppim" library
+CUDA_nppim_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppim.so
+
+//"nppist" library
+CUDA_nppist_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppist.so
+
+//"nppisu" library
+CUDA_nppisu_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppisu.so
+
+//"nppitc" library
+CUDA_nppitc_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnppitc.so
+
+//"npps" library
+CUDA_npps_LIBRARY:FILEPATH=/usr/local/cuda-10.0/lib64/libnpps.so
+
+//Path to a library.
+CUDA_rt_LIBRARY:FILEPATH=/usr/lib/aarch64-linux-gnu/librt.so
+
 //The directory containing a CMake configuration file for OpenCV.
 OpenCV_DIR:PATH=/usr/lib/aarch64-linux-gnu/cmake/opencv4
+
+//Install pybind11 header files?
+PYBIND11_INSTALL:BOOL=OFF
+
+//Python version to use for compiling modules
+PYBIND11_PYTHON_VERSION:STRING=
+
+//Build pybind11 test suite?
+PYBIND11_TEST:BOOL=OFF
+
+//Path to a program.
+PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3.6
+
+//Path to a library.
+PYTHON_LIBRARY:FILEPATH=/usr/lib/aarch64-linux-gnu/libpython3.6m.so
 
 //The directory containing a CMake configuration file for Qt5Core.
 Qt5Core_DIR:PATH=/usr/lib/aarch64-linux-gnu/cmake/Qt5Core
@@ -226,11 +439,36 @@ Qt5Gui_DIR:PATH=/usr/lib/aarch64-linux-gnu/cmake/Qt5Gui
 //The directory containing a CMake configuration file for Qt5Widgets.
 Qt5Widgets_DIR:PATH=/usr/lib/aarch64-linux-gnu/cmake/Qt5Widgets
 
+//Path to a file.
+TENSORRT_INCLUDE_DIR:PATH=/usr/include/aarch64-linux-gnu
+
+//Install pybind11 headers in Python include directory instead
+// of default installation prefix
+USE_PYTHON_INCLUDE_DIR:BOOL=OFF
+
 //Dependencies for the target
 kalman_track_LIB_DEPENDS:STATIC=general;munkres;
 
 //Dependencies for target
 munkres_LIB_DEPENDS:STATIC=
+
+//Value Computed by CMake
+openpose_BINARY_DIR:STATIC=/home/nvidia/hlg/cmake_code/build/openpose
+
+//Dependencies for the target
+openpose_LIB_DEPENDS:STATIC=general;/usr/local/cuda-10.0/lib64/libcudart_static.a;general;-lpthread;general;dl;general;/usr/lib/aarch64-linux-gnu/librt.so;general;tinytrt;general;nvinfer;general;nvinfer_plugin;general;nvparsers;general;nvonnxparser;general;nvcaffe_parser;general;/usr/local/cuda/targets/aarch64-linux/lib/libcudart.so;general;opencv_calib3d;general;opencv_core;general;opencv_dnn;general;opencv_features2d;general;opencv_flann;general;opencv_gapi;general;opencv_highgui;general;opencv_imgcodecs;general;opencv_imgproc;general;opencv_ml;general;opencv_objdetect;general;opencv_photo;general;opencv_stitching;general;opencv_video;general;opencv_videoio;
+
+//Value Computed by CMake
+openpose_SOURCE_DIR:STATIC=/home/nvidia/hlg/cmake_code/openpose
+
+//Value Computed by CMake
+pybind11_BINARY_DIR:STATIC=/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/pybind11
+
+//Value Computed by CMake
+pybind11_SOURCE_DIR:STATIC=/home/nvidia/hlg/cmake_code/tiny-tensorrt/pybind11
+
+//Dependencies for the target
+pytrt_LIB_DEPENDS:STATIC=general;tinytrt;general;nvinfer;general;nvinfer_plugin;general;nvparsers;general;nvonnxparser;general;nvcaffe_parser;
 
 //Dependencies for target
 read_parameter_LIB_DEPENDS:STATIC=
@@ -243,6 +481,15 @@ test2_SOURCE_DIR:STATIC=/home/nvidia/hlg/cmake_code
 
 //Dependencies for the target
 thing_retention_LIB_DEPENDS:STATIC=general;munkres;general;opencv_calib3d;general;opencv_core;general;opencv_dnn;general;opencv_features2d;general;opencv_flann;general;opencv_gapi;general;opencv_highgui;general;opencv_imgcodecs;general;opencv_imgproc;general;opencv_ml;general;opencv_objdetect;general;opencv_photo;general;opencv_stitching;general;opencv_video;general;opencv_videoio;
+
+//Value Computed by CMake
+tinytrt_BINARY_DIR:STATIC=/home/nvidia/hlg/cmake_code/build/tiny-tensorrt
+
+//Dependencies for the target
+tinytrt_LIB_DEPENDS:STATIC=general;/usr/local/cuda-10.0/lib64/libcudart_static.a;general;-lpthread;general;dl;general;/usr/lib/aarch64-linux-gnu/librt.so;
+
+//Value Computed by CMake
+tinytrt_SOURCE_DIR:STATIC=/home/nvidia/hlg/cmake_code/tiny-tensorrt
 
 
 ########################
@@ -343,11 +590,51 @@ CMAKE_GENERATOR:INTERNAL=Unix Makefiles
 CMAKE_GENERATOR_PLATFORM:INTERNAL=
 //Name of generator toolset.
 CMAKE_GENERATOR_TOOLSET:INTERNAL=
+//Have symbol pthread_create
+CMAKE_HAVE_LIBC_CREATE:INTERNAL=
+//Have library pthreads
+CMAKE_HAVE_PTHREADS_CREATE:INTERNAL=
+//Have library pthread
+CMAKE_HAVE_PTHREAD_CREATE:INTERNAL=1
+//Have include pthread.h
+CMAKE_HAVE_PTHREAD_H:INTERNAL=1
 //Source directory with the top level CMakeLists.txt file for this
 // project
 CMAKE_HOME_DIRECTORY:INTERNAL=/home/nvidia/hlg/cmake_code
+//ADVANCED property for variable: CMAKE_INSTALL_BINDIR
+CMAKE_INSTALL_BINDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_DATADIR
+CMAKE_INSTALL_DATADIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_DATAROOTDIR
+CMAKE_INSTALL_DATAROOTDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_DOCDIR
+CMAKE_INSTALL_DOCDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_INCLUDEDIR
+CMAKE_INSTALL_INCLUDEDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_INFODIR
+CMAKE_INSTALL_INFODIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_LIBDIR
+CMAKE_INSTALL_LIBDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_LIBEXECDIR
+CMAKE_INSTALL_LIBEXECDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_LOCALEDIR
+CMAKE_INSTALL_LOCALEDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_LOCALSTATEDIR
+CMAKE_INSTALL_LOCALSTATEDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_MANDIR
+CMAKE_INSTALL_MANDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_OLDINCLUDEDIR
+CMAKE_INSTALL_OLDINCLUDEDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_RUNSTATEDIR
+CMAKE_INSTALL_RUNSTATEDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_SBINDIR
+CMAKE_INSTALL_SBINDIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_SHAREDSTATEDIR
+CMAKE_INSTALL_SHAREDSTATEDIR-ADVANCED:INTERNAL=1
 //Install .so files without execute permission.
 CMAKE_INSTALL_SO_NO_EXE:INTERNAL=1
+//ADVANCED property for variable: CMAKE_INSTALL_SYSCONFDIR
+CMAKE_INSTALL_SYSCONFDIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_LINKER
 CMAKE_LINKER-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_MAKE_PROGRAM
@@ -365,7 +652,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=5
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -406,8 +693,132 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_64_BIT_DEVICE_CODE
+CUDA_64_BIT_DEVICE_CODE-ADVANCED:INTERNAL=1
+//List of intermediate files that are part of the cuda dependency
+// scanning.
+CUDA_ADDITIONAL_CLEAN_FILES:INTERNAL=/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/tinytrt.dir/plugin/PReLUPlugin/tinytrt_generated_PReLUPlugin.cu.o.depend;/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/tinytrt.dir/plugin/UpSamplePlugin/tinytrt_generated_UpSamplePlugin.cu.o.depend;/home/nvidia/hlg/cmake_code/build/tiny-tensorrt/CMakeFiles/tinytrt.dir/plugin/YoloLayerPlugin/tinytrt_generated_YoloLayerPlugin.cu.o.depend;/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/testopenpose_camera.dir//testopenpose_camera_generated_BodyPartConnector.cu.o.depend;/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/testopenpose_camera.dir//testopenpose_camera_generated_OpenPose.cu.o.depend;/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/testopenpose_camera.dir//testopenpose_camera_generated_PoseNMS.cu.o.depend;/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/testopenpose_camera.dir//testopenpose_camera_generated_ResizeAndMerge.cu.o.depend;/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/openpose.dir//openpose_generated_BodyPartConnector.cu.o.depend;/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/openpose.dir//openpose_generated_OpenPose.cu.o.depend;/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/openpose.dir//openpose_generated_PoseNMS.cu.o.depend;/home/nvidia/hlg/cmake_code/build/openpose/CMakeFiles/openpose.dir//openpose_generated_ResizeAndMerge.cu.o.depend
+//ADVANCED property for variable: CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE
+CUDA_ATTACH_VS_BUILD_RULE_TO_CUDA_FILE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_BUILD_CUBIN
+CUDA_BUILD_CUBIN-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_BUILD_EMULATION
+CUDA_BUILD_EMULATION-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_CUDART_LIBRARY
+CUDA_CUDART_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_CUDA_LIBRARY
+CUDA_CUDA_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_GENERATED_OUTPUT_DIR
+CUDA_GENERATED_OUTPUT_DIR-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_HOST_COMPILATION_CPP
+CUDA_HOST_COMPILATION_CPP-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_NVCC_EXECUTABLE
+CUDA_NVCC_EXECUTABLE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_NVCC_FLAGS
+CUDA_NVCC_FLAGS-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_NVCC_FLAGS_DEBUG
+CUDA_NVCC_FLAGS_DEBUG-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_NVCC_FLAGS_MINSIZEREL
+CUDA_NVCC_FLAGS_MINSIZEREL-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_NVCC_FLAGS_RELEASE
+CUDA_NVCC_FLAGS_RELEASE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_NVCC_FLAGS_RELWITHDEBINFO
+CUDA_NVCC_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_PROPAGATE_HOST_FLAGS
+CUDA_PROPAGATE_HOST_FLAGS-ADVANCED:INTERNAL=1
+//This is the value of the last time CUDA_SDK_ROOT_DIR was set
+// successfully.
+CUDA_SDK_ROOT_DIR_INTERNAL:INTERNAL=CUDA_SDK_ROOT_DIR-NOTFOUND
+//ADVANCED property for variable: CUDA_SEPARABLE_COMPILATION
+CUDA_SEPARABLE_COMPILATION-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_TOOLKIT_INCLUDE
+CUDA_TOOLKIT_INCLUDE-ADVANCED:INTERNAL=1
+//This is the value of the last time CUDA_TOOLKIT_ROOT_DIR was
+// set successfully.
+CUDA_TOOLKIT_ROOT_DIR_INTERNAL:INTERNAL=/usr/local/cuda-10.0
+//This is the value of the last time CUDA_TOOLKIT_TARGET_DIR was
+// set successfully.
+CUDA_TOOLKIT_TARGET_DIR_INTERNAL:INTERNAL=/usr/local/cuda-10.0
+//ADVANCED property for variable: CUDA_VERBOSE_BUILD
+CUDA_VERBOSE_BUILD-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_VERSION
+CUDA_VERSION-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_cublas_LIBRARY
+CUDA_cublas_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_cublas_device_LIBRARY
+CUDA_cublas_device_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_cudadevrt_LIBRARY
+CUDA_cudadevrt_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_cudart_static_LIBRARY
+CUDA_cudart_static_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_cufft_LIBRARY
+CUDA_cufft_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_cupti_LIBRARY
+CUDA_cupti_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_curand_LIBRARY
+CUDA_curand_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_cusolver_LIBRARY
+CUDA_cusolver_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_cusparse_LIBRARY
+CUDA_cusparse_LIBRARY-ADVANCED:INTERNAL=1
+//Location of make2cmake.cmake
+CUDA_make2cmake:INTERNAL=/usr/share/cmake-3.10/Modules/FindCUDA/make2cmake.cmake
+//ADVANCED property for variable: CUDA_nppc_LIBRARY
+CUDA_nppc_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppial_LIBRARY
+CUDA_nppial_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppicc_LIBRARY
+CUDA_nppicc_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppicom_LIBRARY
+CUDA_nppicom_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppidei_LIBRARY
+CUDA_nppidei_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppif_LIBRARY
+CUDA_nppif_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppig_LIBRARY
+CUDA_nppig_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppim_LIBRARY
+CUDA_nppim_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppist_LIBRARY
+CUDA_nppist_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppisu_LIBRARY
+CUDA_nppisu_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_nppitc_LIBRARY
+CUDA_nppitc_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: CUDA_npps_LIBRARY
+CUDA_npps_LIBRARY-ADVANCED:INTERNAL=1
+//Location of parse_cubin.cmake
+CUDA_parse_cubin:INTERNAL=/usr/share/cmake-3.10/Modules/FindCUDA/parse_cubin.cmake
+//Location of run_nvcc.cmake
+CUDA_run_nvcc:INTERNAL=/usr/share/cmake-3.10/Modules/FindCUDA/run_nvcc.cmake
+//Details about finding CUDA
+FIND_PACKAGE_MESSAGE_DETAILS_CUDA:INTERNAL=[/usr/local/cuda-10.0][/usr/local/cuda-10.0/bin/nvcc][/usr/local/cuda-10.0/include][/usr/local/cuda-10.0/lib64/libcudart_static.a][v10.0()]
 //Details about finding OpenCV
 FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/usr][v4.1.1()]
+//Details about finding PYTHON
+FIND_PACKAGE_MESSAGE_DETAILS_PYTHON:INTERNAL=/usr/bin/python3.6
+//Details about finding PythonInterp
+FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python3.6][v3.6.9()]
+//Details about finding Threads
+FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
+//Test HAS_FLTO
+HAS_FLTO:INTERNAL=1
+PYBIND11_INCLUDE_DIR:INTERNAL=/home/nvidia/hlg/cmake_code/tiny-tensorrt/pybind11/include
+PYBIND11_LTO_CXX_FLAGS:INTERNAL=-flto;-fno-fat-lto-objects
+PYBIND11_LTO_LINKER_FLAGS:INTERNAL=-flto
+PYBIND11_VERSION_MAJOR:INTERNAL=2
+PYBIND11_VERSION_MINOR:INTERNAL=3
+PYBIND11_VERSION_PATCH:INTERNAL=dev1
+//ADVANCED property for variable: PYTHON_EXECUTABLE
+PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
+PYTHON_INCLUDE_DIRS:INTERNAL=/usr/include/python3.6m
+PYTHON_LIBRARIES:INTERNAL=/usr/lib/aarch64-linux-gnu/libpython3.6m.so
+//ADVANCED property for variable: PYTHON_LIBRARY
+PYTHON_LIBRARY-ADVANCED:INTERNAL=1
+PYTHON_MODULE_EXTENSION:INTERNAL=.cpython-36m-aarch64-linux-gnu.so
+PYTHON_MODULE_PREFIX:INTERNAL=
+PYTHON_VERSION_MAJOR:INTERNAL=3
+PYTHON_VERSION_MINOR:INTERNAL=6
 //Components requested for this build tree.
 _Boost_COMPONENTS_SEARCHED:INTERNAL=filesystem;regex;system
 //Last used Boost_INCLUDE_DIR value.
@@ -420,4 +831,6 @@ _Boost_LIBRARY_DIR_RELEASE_LAST:INTERNAL=/usr/lib/aarch64-linux-gnu
 _Boost_NAMESPACE_LAST:INTERNAL=boost
 //Last used Boost_USE_MULTITHREADED value.
 _Boost_USE_MULTITHREADED_LAST:INTERNAL=TRUE
+//CMAKE_INSTALL_PREFIX during last run
+_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX:INTERNAL=/usr/local
 

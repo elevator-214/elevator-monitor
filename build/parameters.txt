@@ -1,7 +1,7 @@
 ##############CAMERA1参数 左上角摄像头#########################
 cam1_CAMERA_WIDTH =640 #1280
 cam1_CAMERA_HEIGHT =480#720
-cam1_CAMERA_NUM = 0
+cam1_CAMERA_NUM = 1#0
 cam1_VideoPath = "/media/hlg/6AA80074A8004155/maskter_project/experiment/data/video/floor_board/clip_video/ch03_20170315060019_46.avi"
 cam1_yolo_width = 256#352
 cam1_yolo_height = 224
@@ -25,7 +25,7 @@ cam1_thROI_height = 340         //340
 cam2_CAMERA_WIDTH = 640
 cam2_CAMERA_HEIGHT = 480
 
-cam2_CAMERA_NUM =1
+cam2_CAMERA_NUM =0#1
 cam2_fmMinue = 1200
 
 cam2_ppROI_x = 260
