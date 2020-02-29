@@ -74,12 +74,52 @@ namespace hlg
         while (!idTabel[idTabel.size() - 1])
             idTabel.pop_back();
     }
-
-    void ThingInterface::ThingTracker::track(const vector<Rect>&Thing_Detected )
+    void ThingInterface::ThingTracker::Filter_People(vector<Rect>&things_boxes,const vector<Rect>&people_boxes)
+    {
+        static double iou_threshold = 0.01;
+        for (int i = things_boxes.size()-1; i >=0 ; --i)
+        {
+            const Rect&rect_th = things_boxes[i];
+            for (int j = 0; j < people_boxes.size(); ++j)
+            {
+                const Rect&rect_pp = people_boxes[j];
+                //const cv::Rect And = rect_th | rect_pp;
+                const cv::Rect Union = rect_th & rect_pp;
+                const double iou= double(Union.area()*1.0 / rect_pp.area());//ȥ����people_box�ص�����Ƚϴ��things_box
+                // cout<<"det iou"<<iou<<endl;
+                if (iou > iou_threshold)
+                {
+                    things_boxes.erase(things_boxes.begin() + i);
+                    break;
+                }         
+                
+            }
+        }
+        for (int i = tracking_things.size()-1; i >=0 ; --i)
+        {
+            const Rect&rect_th_track = tracking_things[i].box;
+            for (int j = 0; j < people_boxes.size(); ++j)
+            {
+                const Rect&rect_pp = people_boxes[j];
+                //const cv::Rect And = rect_th | rect_pp;
+                const cv::Rect Union = rect_th_track & rect_pp;
+                const double iou= double(Union.area()*1.0 / rect_pp.area());//ȥ����people_box�ص�����Ƚϴ��things_box
+                //  cout<<"track iou:"<<rect_th_track.area()<<" "<<Union.area()<<" "<<rect_pp.area()<<" "<<iou<<endl;
+                if (iou > iou_threshold)
+                {
+                    idTabelDelete(tracking_things[i].id);
+                    tracking_things.erase(tracking_things.begin() + i);
+                    break;
+                }         
+                
+            }
+        }
+    }
+    void ThingInterface::ThingTracker::track(const vector<Rect>&Thing_Detected ,const vector<Rect>&people_boxes)
     {
         vector<Rect>detected_rects = Thing_Detected;
         
-
+        Filter_People(detected_rects,people_boxes);//根据人的位置，进行过滤
         //����������
         std::vector<cv::Rect>tracking_boxes;
         for (int i = 0; i < tracking_things.size(); ++i)

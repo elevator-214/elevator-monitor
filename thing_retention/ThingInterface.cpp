@@ -4,7 +4,7 @@
 #include"ThingTrack.h"
 namespace hlg 
 {
-    //ÌáÈ¡Ç°¾°
+    //ï¿½ï¿½È¡Ç°ï¿½ï¿½
     void ThingInterface::create_ForeExtraction(const double &inputFrame_rows, const double &inputFrame_cols, bool show_flag)
     {
         if (!fore_extracter)
@@ -19,10 +19,10 @@ namespace hlg
     {
         return fore_extracter->scaledSize;
     }
-    //ÌáÈ¡Ç°¾°end
+    //ï¿½ï¿½È¡Ç°ï¿½ï¿½end
 
 
-    //ÎïÌå¼ì²â
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void ThingInterface::create_Thingdetector()
     {
         if (!thingdetector)
@@ -37,28 +37,28 @@ namespace hlg
     {
         thingdetector->SetOutputCoordScale(OriginImage_Height, OriginImage_Width, Current_Size);
     }
-    void ThingInterface::detect_Get_Thing_Result(vector<Rect>&things_boxes, const vector<Rect>&people_boxes,const Rect& thROI)
+    void ThingInterface::detect_Get_Thing_Result(vector<Rect>&things_boxes,  const Rect& thROI)
     {
-        thingdetector->Get_Thing_Result(things_boxes, people_boxes,thROI);
+        thingdetector->Get_Thing_Result(things_boxes,thROI);
     }
 
-    //ÎïÌå¼ì²âend
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½end
 
 
-    //ÎïÌå¸ú×Ù
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void ThingInterface::create_Thingtracker()
     {
         if (!thingtracker)
             delete thingtracker;
         thingtracker = new ThingTracker();
     }
-    void ThingInterface::track(const vector<Rect>&Thing_Detected)
+    void ThingInterface::track(const vector<Rect>&Thing_Detected ,const vector<Rect>&people_boxes)
     {
-        thingtracker->track(Thing_Detected);
+        thingtracker->track(Thing_Detected,people_boxes);
     }
     vector<vector<int>>& ThingInterface::track_GetThingsInfo()
     {
         return thingtracker->GetThingsInfo();
     }
-    //ÎïÌå¸ú×Ùend
+    //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½end
 }

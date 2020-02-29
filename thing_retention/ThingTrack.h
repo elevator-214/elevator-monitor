@@ -21,7 +21,7 @@ namespace hlg
     {
     public:
         ThingTracker(string thing_name = "th");
-        void track(const vector<Rect>&Thing_Detected);
+        void track(const vector<Rect>&Thing_Detected ,const vector<Rect>&people_boxes);
         vector<vector<int>>&GetThingsInfo();
         
 
@@ -30,6 +30,7 @@ namespace hlg
         vector<vector<int>>ThingsInfo;//x1 y1 x3 y3 frame id
         string name;
         vector<bool> idTabel;
+        void Filter_People(vector<Rect>&things_boxes,const vector<Rect>&people_boxes);
         void idTabelDelete(int id);
         int idCreator();
     };

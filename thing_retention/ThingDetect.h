@@ -4,8 +4,8 @@
 namespace hlg
 {
 
-/*ÏÂÃæÎª´ó¼şÎïÆ·¼ì²â¼°¸ú×ÙµÄ¸÷ÖÖÀà*/
-class Contour_Point : public std::array<double, 2>//ÂÖÀªµã
+/*ï¿½ï¿½ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Æ·ï¿½ï¿½â¼°ï¿½ï¿½ï¿½ÙµÄ¸ï¿½ï¿½ï¿½ï¿½ï¿½*/
+class Contour_Point : public std::array<double, 2>//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 {
 public:
 	// dimension of space (or "k" of k-d tree)
@@ -29,20 +29,20 @@ public:
 		(*this)[0] = x;
 		(*this)[1] = y;
 	}
-	int box_id;//¶ÔÓ¦´ó¼şÎïÆ·thing_boxesµÄidºÅ
-			   // ×ªµ½ OpenCV Point2d
+	int box_id;//ï¿½ï¿½Ó¦ï¿½ï¿½ï¿½ï¿½ï¿½Æ·thing_boxesï¿½ï¿½idï¿½ï¿½
+			   // ×ªï¿½ï¿½ OpenCV Point2d
 	operator cv::Point2d() const { return cv::Point2d((*this)[0], (*this)[1]); }
 };
 class MyObejctBox
 {
-	/*@´ó¼şÎïÌå±ß¿òÀà*/
+	/*@ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¿ï¿½ï¿½ï¿½*/
 public:
 	MyObejctBox(const std::vector<cv::Point>&points);
 	MyObejctBox() {};
 	~MyObejctBox() {};
-	int x1;//Íâ½Ó¾ØĞÎ×óÉÏ½Ç
+	int x1;//ï¿½ï¿½Ó¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï½ï¿½
 	int y1;
-	int x3;//Íâ½Ó¾ØĞÎÓÒÏÂ½Ç
+	int x3;//ï¿½ï¿½Ó¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â½ï¿½
 	int y3;
 	cv::Rect rect;
 	void Update_Box(const std::vector<cv::Point>&points);
@@ -55,7 +55,7 @@ public:
 };
 class MyBigObejct
 {
-	/*@´ó¼şÎïÌå±ß¿òÀà*/
+	/*@ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ß¿ï¿½ï¿½ï¿½*/
 public:
 	vector<Point>contour_points;
 	MyObejctBox box;
@@ -70,24 +70,23 @@ public:
 class ThingInterface::ThingDetector
 {
 private:
-	float big_area_threshold;//´óÎïÌåÃæ»ıãĞÖµ£¬´óÓÚÕâ¸öãĞÖµµÄ±»ÅĞ¶ÏÎª´ó¼şÎïÌå
-	float big_area_distance;//´óÎïÌå¾àÀëãĞÖµ£¬½«¾àÀëĞ¡ÓÚÕâ¸öãĞÖµµÄ´óÎïÌå½øĞĞºÏ²¢
-	float small_area_threshold;//Ğ¡ÎïÌåÃæ»ıãĞÖµ£¬Ğ¡ÓÚÕâ¸öãĞÖµµÄµ±×÷ÔëÉùÂË³ı
-	float distance_threshold;//¾àÀëãĞÖµ£¬Èç¹ûĞ¡ÂÖÀª¾àÀë´óÂÖÀªµÄ×îĞ¡¾àÀëĞ¡ÓÚÕâ¸öÖµ£¬Ôò½«Ğ¡ÎïÌå¹éµ½´óÎïÌåÖĞ
-	const double intersection_small_rate = 0.4;//×îºó¶Ô´óÎïÌåºÏ²¢µÄãĞÖµ
-	const double aspect_ratio_threshold = 4.0;//½«²»·ûºÏ³¤¿í±ÈÒªÇóµÄ¼ì²â¿òÌŞ³ı
-    bool show_flag;//trueÔòÏÔÊ¾´¦Àí½á¹û
+	float big_area_threshold;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½Ä±ï¿½ï¿½Ğ¶ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	float big_area_distance;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½Ä´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ĞºÏ²ï¿½
+	float small_area_threshold;//Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½Äµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½
+	float distance_threshold;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½Ğ¡ï¿½ï¿½ï¿½ï¿½éµ½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	const double intersection_small_rate = 0.4;//ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿½ï¿½ï¿½Ï²ï¿½ï¿½ï¿½ï¿½ï¿½Öµ
+	const double aspect_ratio_threshold = 4.0;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï³ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Ş³ï¿½
+    bool show_flag;//trueï¿½ï¿½ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     double ScaleFactor_Width;
     double ScaleFactor_Height;
     std::vector<MyBigObejct>big_obejcts;
-    void ThingBox_Filter();//¸ù¾İÒ»Ğ©×Ô¶¨ÒåµÄ¹æÔò£¬Èç³¤¿í±È£¬½»²¢±ÈµÈ£¬¶Ô¼ì²â³öÀ´µÄÇ°¾°¿ò½øĞĞÒ»Ğ©ºÏ²¢¼°É¾³ı
-    void Filter_People(vector<Rect>&things_boxes, const vector<Rect>&people_boxes);//¸ù¾İiou°ÑÈËÍ·ÂË³ıµô
+    void ThingBox_Filter();//ï¿½ï¿½ï¿½ï¿½Ò»Ğ©ï¿½Ô¶ï¿½ï¿½ï¿½Ä¹ï¿½ï¿½ï¿½ï¿½ç³¤ï¿½ï¿½ï¿½È£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÈµÈ£ï¿½ï¿½Ô¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»Ğ©ï¿½Ï²ï¿½ï¿½ï¿½É¾ï¿½ï¿½
 public:
     ThingDetector(const float &big_area_threshold = 3000.0, const float& small_area_threshold = 1000.0, const float& distance_threshold = 70.0, const float& big_area_distance = 30.0,bool show_flag=false);
 	~ThingDetector() {}
-	void ThingsDetect(const Mat &ForemaskImage);//¸ù¾İÇ°¾°Í¼À´°ÑÎïÌå¼ì²â³öÀ´
+	void ThingsDetect(const Mat &ForemaskImage);//ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Í¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
     void SetOutputCoordScale(double OriginImage_Height, double OriginImage_Width,Size Current_Size);
-    void Get_Thing_Result(vector<Rect>&things_boxes, const vector<Rect>&people_boxes,  const Rect& thROI);//×ø±ê×ª»»£¬Í¬Ê±¸ù¾İiou°ÑÈËÍ·ÂË³ıµô,²¢¸ù¾İthROI½øĞĞÂË³ı
+    void Get_Thing_Result(vector<Rect>&things_boxes,  const Rect& thROI);//ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½Í¬Ê±ï¿½ï¿½ï¿½ï¿½iouï¿½ï¿½ï¿½ï¿½Í·ï¿½Ë³ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½thROIï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½
 };
 
 }

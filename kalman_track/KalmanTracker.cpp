@@ -11,13 +11,15 @@ int ppFlowLine;
 MyKalmanFilter::MyKalmanFilter(int id_0, Point2f measurement_0,Rect box)
 {
     id = id_0;
-    confidence = 4;
+    
+    confidence = 15;
     trajectory.clear();
     inside_inc = 0;
     outside_inc = 0;
     confidence_inc = 0;
     confidence_dec = 0;
-    MyKalmanFilter::box=box;
+    confidence_linear_decrease_frame=10;
+    this->box=box;
     statePre = Mat::zeros(4, 1, CV_32F);
     statePost = Mat::zeros(4, 1, CV_32F);	//x
     statePost.at<float>(0) = measurement_0.x;
@@ -35,9 +37,9 @@ MyKalmanFilter::MyKalmanFilter(int id_0, Point2f measurement_0,Rect box)
     errorCovPost = Mat::zeros(4, 4, CV_32F);	//P
     setIdentity(errorCovPost, Scalar::all(1));
     processNoiseCov = Mat::eye(4, 4, CV_32F);	//Q
-    setIdentity(processNoiseCov, Scalar::all(1e-2));
+    setIdentity(processNoiseCov, Scalar::all(1e-3));
     measurementNoiseCov = Mat::eye(2, 2, CV_32F);	//R
-    setIdentity(measurementNoiseCov, Scalar::all(1e-1));
+    setIdentity(measurementNoiseCov, Scalar::all(1e-6));
 
     temp1.create(4, 4, CV_32F);
     temp2.create(2, 4, CV_32F);
@@ -54,29 +56,43 @@ Point2f MyKalmanFilter::position()
 
     return pt;
 }
-void MyKalmanFilter::kalman_correct(const Point2f center_point)
+void MyKalmanFilter::kalman_correct(const Point2f center_point,const Rect& detected_box)
 {
     const Mat measurement=liPointToMat(center_point);
+    // printf("before correct:%d,%d\n",int(statePost.at<float>(0)),int(statePost.at<float>(1)));
     this->correct(measurement);
+    this->box.width=detected_box.width;
+    this->box.height=detected_box.height;
+    this->box.x=max(int(statePost.at<float>(0))-(this->box.width)/2,0);
+    this->box.y=max(int(statePost.at<float>(1))-(this->box.height)/2,0);
+    // printf("after correct:%d,%d\n",int(statePost.at<float>(0)),int(statePost.at<float>(1)));
 }
 void MyKalmanFilter::kalman_predict()
 {
     this->predict();
-    this->box.x=int(statePost.at<float>(0))-this->box.width;
-    this->box.y=int(statePost.at<float>(1))-this->box.height;
+    this->box.x=int(statePost.at<float>(0))-(this->box.width)/2;
+    this->box.y=int(statePost.at<float>(1))-(this->box.height)/2;
 }
 void MyKalmanFilter::confidenceIncrease()
 {
     confidence_inc++;
     confidence_dec = 0;
-    confidence += log(confidence_inc + 1) / log(1.5f);
+    confidence +=confidence_inc;
+    cout<<"in confidence:"<<confidence<<endl;
+    // confidence += log(confidence_inc + 1) / log(1.5f);
 }
 
 bool MyKalmanFilter::confidenceDecrease()
 {
     confidence_dec++;
     confidence_inc = 0;
-    confidence -= pow(1.5f, confidence_dec);
+    if(confidence_dec<confidence_linear_decrease_frame)//分段递减
+        confidence-=confidence_dec;
+    else
+    {
+        confidence -= pow(2.0f, (confidence_dec-6));
+    }
+    cout<<"de confidence:"<<confidence<<endl;
     if (confidence < 0)
     {
         confidence = 0;
@@ -406,6 +422,8 @@ void PeopleKalmanTracker::track(vector<Point2f> measurement,std::vector<cv::Rect
     //首先使用卡尔曼滤波预测位置
     for(int i=0;i<target.size();i++)
         target[i].kalman_predict();
+    // for(int i=0;i<target.size();i++)
+    //     printf("kalman predict:%d,%d\n",target[i].kalman_predict());
     //计算距离矩阵
     std::vector<cv::Rect>tracking_boxes;
     for(int i=0;i<target.size();i++)
@@ -487,7 +505,7 @@ void PeopleKalmanTracker::track(vector<Point2f> measurement,std::vector<cv::Rect
     {
         target[iter.second].track_frame++;//跟踪帧数增加
         target[iter.second].confidenceIncrease();
-        target[iter.second].kalman_correct(measurement[iter.first]);
+        target[iter.second].kalman_correct(measurement[iter.first],ppDetectionRect[iter.first]);
     }
     PeopleFlow();//人流量计数
     //对于距离太远的跟踪目标,需要降低其置信度,置信度低于一定值,将其从后往前删除
@@ -504,7 +522,7 @@ void PeopleKalmanTracker::track(vector<Point2f> measurement,std::vector<cv::Rect
         else//置信度没减到0以下,用上次的跟踪结果更新卡尔曼滤波器
         {
             (*k).track_frame++;//跟踪帧数增加
-            (*k).kalman_correct((*k).position());
+            (*k).kalman_correct((*k).position(),(*k).box);
         }
 
     }
@@ -516,7 +534,7 @@ void PeopleKalmanTracker::track(vector<Point2f> measurement,std::vector<cv::Rect
         #endif
         if(rows_set.find(i)==rows_set.end())//没有匈牙利匹配成功的目标
         {
-            target.push_back(MyPersonKalmanFilter(idCreator(), measurement[i],ppDetectionRect.size()>0?ppDetectionRect[i]:Rect()));
+            target.push_back(MyPersonKalmanFilter(idCreator(), measurement[i],ppDetectionRect[i]));
         }
     }
 }

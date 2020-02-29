@@ -30,12 +30,12 @@ namespace hlg
         void create_Thingdetector();
         void detect_ThingsDetect(const Mat &ForemaskImage);//����ǰ��ͼ�������������
         void detect_SetOutputCoordScale(double OriginImage_Height, double OriginImage_Width, Size Current_Size);
-        void detect_Get_Thing_Result(vector<Rect>&things_boxes, const vector<Rect>&people_boxes, const Rect& thROI);//����ת����ͬʱ����iou����ͷ�˳���
+        void detect_Get_Thing_Result(vector<Rect>&things_boxes,  const Rect& thROI);//����ת����ͬʱ����iou����ͷ�˳���
         //������end
         
         //�������
         void create_Thingtracker();
-        void track(const vector<Rect>&Thing_Detected);
+        void track(const vector<Rect>&Thing_Detected ,const vector<Rect>&people_boxes);
         vector<vector<int>>& track_GetThingsInfo();
         //�������end
     private:

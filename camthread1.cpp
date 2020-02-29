@@ -82,7 +82,7 @@ void CamThread1 :: run()
     /*  Frame Patameters	*/
     /************************/
     cv::VideoCapture capture;
-    while(!capture.open(CAMERA_NUM))
+    while(!capture.open(CAMERA_NUM))//"./ch03_20170315060019_31.avi"
     {
         no_camera1=true;
         msleep(1000);
@@ -164,10 +164,11 @@ void CamThread1 :: run()
                 }
                 capture.read(img);
             }
+            cv::resize(img,img,Size(CAMERA_WIDTH,CAMERA_HEIGHT));
 //            auto total_start = std::chrono::steady_clock::now();
             ch.put(img);
             // cout<<"puting!"<<endl;
-           //std::this_thread::sleep_for(150ms);
+        //    std::this_thread::sleep_for(100ms);
 //            auto total_end = std::chrono::steady_clock::now();
 //            float cost_ms=std::chrono::duration_cast<std::chrono::milliseconds>(total_end - total_start).count();
 //            std::cout<<cost_ms<<"ms"<<std::endl;
@@ -359,32 +360,33 @@ void CamThread1 :: run()
             {
                 auto idx = indices[i];
                 ppDetectionRect.push_back(boxes[idx]);
+                
             }
             /*YOLOv3检测结束*/
 
             //将检测框中心点还原到原图像中的坐标
             std::vector<cv::Point2f> ppDetection;
-            for (int i =0;i< ppDetectionRect.size(); i++)
+            for (int i =0;i< ppDetectionRect.size(); ++i)
             {
-                ppDetectionRect[i].x+=ppROI.x;
-                ppDetectionRect[i].y+=ppROI.y;
+                ppDetectionRect[i].x=max(ppDetectionRect[i].x+ppROI.x,0);
+                ppDetectionRect[i].y=max(ppDetectionRect[i].y+ppROI.y,0);
                 ppDetection.push_back(Point2f(ppDetectionRect[i].x + ppDetectionRect[i].width / 2 , ppDetectionRect[i].y + ppDetectionRect[i].height / 2));
             }
 
             //对检测结果进行修正,这个函数感觉需要根据模型检测结果修改---HLG
             vector<Point2f> ppMeasurement=ppDetection;
-
+            // cout<<"begin pp track"<<endl;
             //Tracking 修正行人卡尔曼滤波位置
             ppTracker.track(ppMeasurement,ppDetectionRect);//ppMeasurement为检测中心点 ppDetectionRect检测矩形框
             /*判断行人滞留,统计人流量等功能 modified by HLG*/
             ppRetent = false;
             cam1_ppRetent=false;
             ppCount = ppTracker.target.size();	//count
-
+            
             //滞留判断 画不同颜色矩形框
             static vector<Rect>people_boxes;//存储行人框，用于后面过滤大件物体
             people_boxes.resize(ppCount);
-            for (int i = 0; i < ppCount; i++)
+            for (int i = 0; i < ppCount; ++i)
             {
                 //retention
                 stringstream ssid;
@@ -408,6 +410,7 @@ void CamThread1 :: run()
                 }
 
             }
+
             //flow 人流量进出判断 30秒人流量统计
             ppFlowIn=ppTracker.up_to_down_count;//总从上到下人流量,一直增长,不置0
             ppFlowOut=ppTracker.down_to_up_count;
@@ -430,26 +433,28 @@ void CamThread1 :: run()
             cam1_thRetent=false;//与电梯控制器通信
             th_image=src.clone();
 
-
             if (thing_interface.fore_ExtractFore(th_image, foregroundMask))//提取前景
-            {                    
+            {                  
                 thing_interface.detect_ThingsDetect(foregroundMask);//从前景中提取出大件物体           
                 static once_flag SetOutputCoordScale_flag;//由于在提取的时候，尺寸是固定的，因此输出的坐标需要进行尺度转换
                 auto SetOutputCoordScale_fun= std::bind(&hlg::ThingInterface::detect_SetOutputCoordScale, std::ref(thing_interface), std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);//std::ref：为了只析构1次
                 std::call_once(SetOutputCoordScale_flag, SetOutputCoordScale_fun, capture.get(CAP_PROP_FRAME_HEIGHT), capture.get(CAP_PROP_FRAME_WIDTH), thing_interface.fore_getScaledSize());
                 static vector<Rect>Thing_Detected;
-                thing_interface.detect_Get_Thing_Result(Thing_Detected, people_boxes,thROI);//滤除行人，并进行尺度变换
-                thing_interface.track(Thing_Detected);
+                thing_interface.detect_Get_Thing_Result(Thing_Detected,thROI);//滤除行人，并进行尺度变换
+                thing_interface.track(Thing_Detected, people_boxes);
+ 
                 // cout << "main time:" << double(clock() - start_time) / CLOCKS_PER_SEC << endl;
-                //total_time += clock() - start_time;
+
                 const vector<vector<int>>&tracking_result = thing_interface.track_GetThingsInfo();
                 //滞留检测 画图像
+ 
                 for (int i = 0; i < tracking_result.size(); ++i)
-                {
+                {   
                     const int x1 = max(tracking_result[i][0], thROI.x);
                     const int y1 = max(tracking_result[i][1], thROI.y);
                     const int x3 = min(tracking_result[i][2], thROI.x+thROI.width-1);
                     const int y3 = min(tracking_result[i][3], thROI.y + thROI.height - 1);
+                    const Rect rect(x1,y1,x3-x1+1,y3-y1+1);
                     const int &track_frame = tracking_result[i][4];
                     const int &id = tracking_result[i][5];
                     stringstream ssid;
@@ -458,18 +463,14 @@ void CamThread1 :: run()
                     ssid >> sid;
                     if (track_frame > retention_frame_threshold)
                     {//达到滞留帧数阈值，用红色画框,否则用品红色画框
-                        cv::rectangle(dst, Point(x1, y1),
-                            Point(x3, y3),
-                            cv::Scalar(0, 0, 255));
+                        cv::rectangle(dst, rect,cv::Scalar(0, 0, 255));
                         putText(dst, sid,cv::Point((x1+x3)/2,(y1+y3)/2), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 1);
                         thRetent = true;
                         cam1_thRetent=true;
                     }
                     else
                     {
-                        cv::rectangle(dst, Point(x1, y1),
-                            Point(x3, y3),
-                            cv::Scalar(255, 0, 255));
+                        cv::rectangle(dst, rect,cv::Scalar(255, 0, 255));
                         putText(dst, sid, cv::Point((x1+x3)/2,(y1+y3)/2), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 0, 255), 1);
                     }                   
                 }
@@ -562,6 +563,7 @@ void CamThread1 :: run()
             //Video Control
 //            std::this_thread::sleep_for(150ms);
             msleep(1);
+            // cout<<"begin next frame"<<endl; 
         }
     }));
 

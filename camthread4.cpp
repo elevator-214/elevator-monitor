@@ -53,6 +53,7 @@ CamThread4 :: ~CamThread4()
 
 void CamThread4 :: run()
 {
+    while(true);
 //    while(true)
 //    {
 ////        cout<<"cam4"<<endl;

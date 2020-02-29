@@ -51,6 +51,7 @@ CamThread3 :: ~CamThread3()
 
 void CamThread3 :: run()
 {
+    while(true);
 //    while(true)
 //    {
 //        if(SetRoi_hd1_flag)

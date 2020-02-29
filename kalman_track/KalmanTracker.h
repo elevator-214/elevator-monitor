@@ -22,9 +22,10 @@ public:
     int inside_inc;
     int outside_inc;
     Point2f position();
+    int confidence_linear_decrease_frame ;//置信度分段递减阈值
     void confidenceIncrease();
     bool confidenceDecrease();
-    void kalman_correct(const Point2f center_point);
+    void kalman_correct(const Point2f center_point,const Rect& detected_box);
     void kalman_predict();
 private:
     int confidence_inc;
@@ -36,7 +37,7 @@ class MyPersonKalmanFilter : public MyKalmanFilter
 {
 public:
     MyPersonKalmanFilter(int id_0 = 0, Point2f measurement_0 = Point2f(0, 0),Rect box=Rect());
-    ~MyPersonKalmanFilter(){}
+    ~MyPersonKalmanFilter(){}  
     enum side{defaut,up,down};
     enum side appearside;//出现的位置
     enum side disappearside;//消失位置
