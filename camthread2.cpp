@@ -22,6 +22,39 @@ extern bool drawSkeleton_flag;//是否画骨架标志位
 extern bool drawID_flag;//是否画id标志位
 extern bool drawBox_flag;//是否画检测框标志位
 extern bool cam2_start_flag;
+// Body parts mapping
+const std::map<unsigned int, std::string> POSE_BODY_25_BODY_PARTS {
+    {0,  "Nose"},
+    {1,  "Neck"},
+    {2,  "RShoulder"},
+    {3,  "RElbow"},
+    {4,  "RWrist"},
+    {5,  "LShoulder"},
+    {6,  "LElbow"},
+    {7,  "LWrist"},
+    {8,  "MidHip"},
+    {9,  "RHip"},
+    {10, "RKnee"},
+    {11, "RAnkle"},
+    {12, "LHip"},
+    {13, "LKnee"},
+    {14, "LAnkle"},
+    {15, "REye"},
+    {16, "LEye"},
+    {17, "REar"},
+    {18, "LEar"},
+    {19, "LBigToe"},
+    {20, "LSmallToe"},
+    {21, "LHeel"},
+    {22, "RBigToe"},
+    {23, "RSmallToe"},
+    {24, "RHeel"},
+    {25, "Background"}
+};
+const vector<int>bones={1,8,   1,2,   1,5,   2,3,   3,4,   5,6,   6,7,   8,9,   9,10,  10,11, 8,12,  12,13, 13,14,  1,0,   0,15, 15,17,  0,16, 16,18,   14,19,19,20,14,21, 11,22,22,23,11,24};
+const int bones_num=bones.size()/2;
+const int keypoints_num=25;
+const int value_per_person=keypoints_num*3;
 CamThread2 :: CamThread2()
 {
     CAMERA_WIDTH = hlg::cam2_CAMERA_WIDTH;
@@ -169,8 +202,27 @@ void CamThread2 :: run()
                 }
                 openpose.DoInference(inputData,result);
                 cv::cvtColor(dst,dst,cv::COLOR_RGB2BGR);
-                for(size_t i=0;i<result.size()/3;i++) {
-                    cv::circle(dst,cv::Point(result[i*3],result[i*3+1]),2,cv::Scalar(0,255,0),-1);
+                // cout<<"result.size()/3:"<<result.size()/3<<endl;
+                for(size_t i=0;i<result.size()/value_per_person;++i) {
+                    for(int j=0;j<bones_num;++j)
+                    {
+                        const int index1=bones[j*2];
+                        const int index2=bones[j*2+1];
+                        
+                        const double confidence1=result[value_per_person*i+3*index1+2];
+                        const double confidence2=result[value_per_person*i+3*index2+2];
+                        cout<<confidence1<<" "<<confidence2<<endl;
+                        if(min(confidence1,confidence2)>0.05)
+                        {
+                            const Point point1(result[value_per_person*i+3*index1],result[value_per_person*i+3*index1+1]);                       
+                            const Point point2(result[value_per_person*i+3*index2],result[value_per_person*i+3*index2+1]);
+                            cv::line(dst,point1,point2, Scalar(0, 255, 255), 2 );
+                        }
+                        
+                        // cv::circle(dst,cv::Point(result[i*3],result[i*3+1]),2,cv::Scalar(0,255,0),-1);
+                        // putText(dst, to_string(i), cv::Point(result[i*3],result[i*3+1]), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
+                    }
+                    
                 }
 
 

@@ -61,7 +61,7 @@ private:
     int64_t mHeatMapSize;
     nvinfer1::Dims3 mHeatMapDims;
 
-    const float mResizeScale = 4; // resize 8x
+    const float mResizeScale = 8; // resize 8x
     void* mpResizeMapGpu;
     float* mpResizeMapCpu;
     int64_t mResizeMapSize;
