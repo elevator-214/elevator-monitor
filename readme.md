@@ -53,5 +53,6 @@ https://github.com/zerollzeng/tensorrt-zoo
 
 ### 2020.03.02
 把代码文件都整理到文件夹中，分了模块，方便后人阅读。
+
 启动程序自动打开风扇，把xavier调到最大功率模式，防止烧坏。
 
