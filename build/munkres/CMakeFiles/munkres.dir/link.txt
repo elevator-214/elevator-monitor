@@ -1,2 +1,2 @@
-/usr/bin/ar qc libmunkres.a  CMakeFiles/munkres.dir/munkres_autogen/mocs_compilation.cpp.o
+/usr/bin/ar qc libmunkres.a  
 /usr/bin/ranlib libmunkres.a

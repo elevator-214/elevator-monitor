@@ -1,2 +1,2 @@
-/usr/bin/ar qc libread_parameter.a  CMakeFiles/read_parameter.dir/read_para.cpp.o CMakeFiles/read_parameter.dir/read_parameter_autogen/mocs_compilation.cpp.o
+/usr/bin/ar qc libread_parameter.a  CMakeFiles/read_parameter.dir/read_para.cpp.o
 /usr/bin/ranlib libread_parameter.a

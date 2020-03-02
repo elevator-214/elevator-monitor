@@ -129,8 +129,11 @@ CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO:STRING=
 //Enable/Disable output of compile commands during generation.
 CMAKE_EXPORT_COMPILE_COMMANDS:BOOL=OFF
 
-//ON
-CMAKE_FIND_DEBUG_MODE:BOOL=ON
+//No help, variable specified on the command line.
+CMAKE_FIND_DEBUG_MODE:UNINITIALIZED=ON
+
+//No help, variable specified on the command line.
+CMAKE_FIND_RELEASE_MODE:UNINITIALIZED=ON
 
 //User executables (bin)
 CMAKE_INSTALL_BINDIR:PATH=bin
@@ -214,7 +217,7 @@ CMAKE_OBJCOPY:FILEPATH=/usr/bin/objcopy
 CMAKE_OBJDUMP:FILEPATH=/usr/bin/objdump
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=test2
+CMAKE_PROJECT_NAME:STATIC=elevator_monitor
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -427,8 +430,17 @@ PYBIND11_TEST:BOOL=OFF
 //Path to a program.
 PYTHON_EXECUTABLE:FILEPATH=/usr/bin/python3.6
 
+//Path to a file.
+PYTHON_INCLUDE_DIR:PATH=/usr/include/python3.6m
+
 //Path to a library.
 PYTHON_LIBRARY:FILEPATH=/usr/lib/aarch64-linux-gnu/libpython3.6m.so
+
+//Path to a library.
+PYTHON_LIBRARY_DEBUG:FILEPATH=PYTHON_LIBRARY_DEBUG-NOTFOUND
+
+//The directory containing a CMake configuration file for Python.
+Python_DIR:PATH=Python_DIR-NOTFOUND
 
 //The directory containing a CMake configuration file for Qt5Core.
 Qt5Core_DIR:PATH=/usr/lib/aarch64-linux-gnu/cmake/Qt5Core
@@ -445,6 +457,12 @@ TENSORRT_INCLUDE_DIR:PATH=/usr/include/aarch64-linux-gnu
 //Install pybind11 headers in Python include directory instead
 // of default installation prefix
 USE_PYTHON_INCLUDE_DIR:BOOL=OFF
+
+//Value Computed by CMake
+elevator_monitor_BINARY_DIR:STATIC=/home/nvidia/hlg/cmake_code/build
+
+//Value Computed by CMake
+elevator_monitor_SOURCE_DIR:STATIC=/home/nvidia/hlg/cmake_code
 
 //Dependencies for the target
 kalman_track_LIB_DEPENDS:STATIC=general;munkres;
@@ -652,7 +670,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=8
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=9
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -799,6 +817,8 @@ FIND_PACKAGE_MESSAGE_DETAILS_OpenCV:INTERNAL=[/usr][v4.1.1()]
 FIND_PACKAGE_MESSAGE_DETAILS_PYTHON:INTERNAL=/usr/bin/python3.6
 //Details about finding PythonInterp
 FIND_PACKAGE_MESSAGE_DETAILS_PythonInterp:INTERNAL=[/usr/bin/python3.6][v3.6.9()]
+//Details about finding PythonLibs
+FIND_PACKAGE_MESSAGE_DETAILS_PythonLibs:INTERNAL=[/usr/lib/aarch64-linux-gnu/libpython3.6m.so][/usr/include/python3.6m][v3.6.9(3.6)]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //Test HAS_FLTO
@@ -811,10 +831,14 @@ PYBIND11_VERSION_MINOR:INTERNAL=3
 PYBIND11_VERSION_PATCH:INTERNAL=dev1
 //ADVANCED property for variable: PYTHON_EXECUTABLE
 PYTHON_EXECUTABLE-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: PYTHON_INCLUDE_DIR
+PYTHON_INCLUDE_DIR-ADVANCED:INTERNAL=1
 PYTHON_INCLUDE_DIRS:INTERNAL=/usr/include/python3.6m
 PYTHON_LIBRARIES:INTERNAL=/usr/lib/aarch64-linux-gnu/libpython3.6m.so
 //ADVANCED property for variable: PYTHON_LIBRARY
 PYTHON_LIBRARY-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: PYTHON_LIBRARY_DEBUG
+PYTHON_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
 PYTHON_MODULE_EXTENSION:INTERNAL=.cpython-36m-aarch64-linux-gnu.so
 PYTHON_MODULE_PREFIX:INTERNAL=
 PYTHON_VERSION_MAJOR:INTERNAL=3

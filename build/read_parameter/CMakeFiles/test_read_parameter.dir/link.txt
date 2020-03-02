@@ -1,1 +1,1 @@
-/usr/bin/c++  -O3 -DNDEBUG  -rdynamic CMakeFiles/test_read_parameter.dir/test.cpp.o CMakeFiles/test_read_parameter.dir/read_para.cpp.o CMakeFiles/test_read_parameter.dir/test_read_parameter_autogen/mocs_compilation.cpp.o  -o test_read_parameter  -L/home/nvidia/hlg/cmake_code/lib 
+/usr/bin/c++  -O3 -DNDEBUG  -rdynamic CMakeFiles/test_read_parameter.dir/test.cpp.o CMakeFiles/test_read_parameter.dir/read_para.cpp.o  -o ../test_read_parameter 

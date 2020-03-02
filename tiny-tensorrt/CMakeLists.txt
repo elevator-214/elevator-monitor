@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.0)
 
 
 project(tinytrt)
-
 set(CMAKE_CXX_FLAGS "-std=c++11")
 
+find_library(CUDART cudart HINTS /usr/local/cuda/targets/aarch64-linux/lib/)
 # set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib CACHE PATH "")
 option(BUILD_PYTHON "compile python api" ON)
 
@@ -48,6 +48,7 @@ file(GLOB_RECURSE trt_source
 cuda_add_library(tinytrt SHARED ${trt_source})
 target_compile_options(tinytrt PUBLIC -std=c++11 -Wall -Wfloat-conversion)
 set_target_properties(tinytrt PROPERTIES POSITION_INDEPENDENT_CODE ON)
+target_include_directories(tinytrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(BUILD_PYTHON)
   message(STATUS "Build python")
