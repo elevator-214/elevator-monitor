@@ -22,9 +22,8 @@ This project is implemented in C++ and uses QT for interface interaction. Just a
 - [✔] Human keypoints extraction by Openpose+TensorRT
 - [✔] Human keypoints tracking
 
-
-
 ## Pre-installation required
+
 **CUDA**
 
 **cudnn**
@@ -46,7 +45,14 @@ cmake ..
 make
 ./elevator_monitor
 ```
+## Some models & files required
+
+**BaiduYunPan url:** uploading
+
+**usage**:Download and move models & files to **build/**
+
 ## Reference
+
 https://github.com/gishi523/kd-tree
 
 https://github.com/saebyn/munkres-cpp
@@ -54,19 +60,4 @@ https://github.com/saebyn/munkres-cpp
 https://github.com/zerollzeng/tensorrt-zoo
 
 
-
-## commit log
-### 2020.02.27
-完成了大件物品滞留算法的重新设计以及移植
-
-### 2020.02.29
-修改了线程1的Bug，如kalman坐标错误等等
-
-### 2020.03.01
-在线程2上完成了基于tensorRT的关键点提取
-
-### 2020.03.02
-把代码文件都整理到文件夹中，分了模块，方便后人阅读。
-
-启动程序自动打开风扇，把xavier调到最大功率模式，防止烧坏。
 
