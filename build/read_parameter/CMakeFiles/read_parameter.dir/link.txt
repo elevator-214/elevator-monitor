@@ -1,2 +1,0 @@
-/usr/bin/ar qc libread_parameter.a  CMakeFiles/read_parameter.dir/read_para.cpp.o
-/usr/bin/ranlib libread_parameter.a

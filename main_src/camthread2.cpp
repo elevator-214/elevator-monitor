@@ -1,6 +1,7 @@
 #include "camthread2.h"
 #include <boost/asio.hpp>//gai
 #include <OpenPose.hpp>
+#include<keypoints_tracking.h>
 #include <ctime>
 
 Mat src2;
@@ -51,9 +52,11 @@ const std::map<unsigned int, std::string> POSE_BODY_25_BODY_PARTS {
     {24, "RHeel"},
     {25, "Background"}
 };
-const vector<int>bones={1,8,   1,2,   1,5,   2,3,   3,4,   5,6,   6,7,   8,9,   9,10,  10,11, 8,12,  12,13, 13,14,  1,0,   0,15, 15,17,  0,16, 16,18,   14,19,19,20,14,21, 11,22,22,23,11,24};
-const int bones_num=bones.size()/2;
-const int keypoints_num=25;
+const vector<int>keypoint_ids={0,1,2,3,4,5,6,7,9,10,11,12,13,14};//用到的关键点序号
+const vector<int>bones={  1,2,   1,5,   2,3,   3,4,   5,6,   6,7,   2,9,   5,12,     9,10,    10,11,    12,13, 13,14,  1,0  };//tensorrt 提取结果的骨架号
+const vector<int>bones_resort={1,2, 1,5, 2,3, 3,4, 5,6, 6,7, 2,8, 5,11, 8,9, 9,10, 11,12, 12,13, 1,0};//将骨架号按顺序重新排序后的骨架号
+const int keypoints_num=25;//tensorrt提取结果关键点数量
+const int keypoints_num_track=keypoint_ids.size();//重新排序后关键点数量
 const int value_per_person=keypoints_num*3;
 CamThread2 :: CamThread2()
 {
@@ -164,6 +167,7 @@ void CamThread2 :: run()
                             calibratorData,
                             maxBatchSize,
                             run_mode);
+        hlg::Skeleton_Tracking skeleton_tracker(keypoints_num_track,bones_resort);
         std::vector<float> inputData;
         inputData.resize(N * C * H * W);
         std::vector<float> result;
@@ -203,28 +207,39 @@ void CamThread2 :: run()
                 openpose.DoInference(inputData,result);
                 cv::cvtColor(dst,dst,cv::COLOR_RGB2BGR);
                 // cout<<"result.size()/3:"<<result.size()/3<<endl;
+                int people_num=result.size()/value_per_person;
+                std::vector<std::vector<double>>keypoints(people_num,std::vector<double>(keypoints_num_track*3));
+                double total_confidence=0.0;
+                int non_zero_confidence_num=0;
                 for(size_t i=0;i<result.size()/value_per_person;++i) {
-                    for(int j=0;j<bones_num;++j)
+                    total_confidence=0.0;
+                    non_zero_confidence_num=0;
+                    for(int j=0;j<keypoints_num_track;++j)
                     {
-                        const int index1=bones[j*2];
-                        const int index2=bones[j*2+1];
-                        
-                        const double confidence1=result[value_per_person*i+3*index1+2];
-                        const double confidence2=result[value_per_person*i+3*index2+2];
-                        cout<<confidence1<<" "<<confidence2<<endl;
-                        if(min(confidence1,confidence2)>0.05)
+                        const int index=keypoint_ids[j];
+                        const double x=result[value_per_person*i+3*index];
+                        const double y=result[value_per_person*i+3*index+1];
+                        const double confidence=result[value_per_person*i+3*index+2];
+                        keypoints[i][3*j]=x;
+                        keypoints[i][3*j+1]=y;
+                        keypoints[i][3*j+2]=confidence;
+                        if(abs(confidence-0)>0.000001)
                         {
-                            const Point point1(result[value_per_person*i+3*index1],result[value_per_person*i+3*index1+1]);                       
-                            const Point point2(result[value_per_person*i+3*index2],result[value_per_person*i+3*index2+1]);
-                            cv::line(dst,point1,point2, Scalar(0, 255, 255), 2 );
-                        }
-                        
+                            total_confidence+=confidence;
+                            non_zero_confidence_num+=1;
+                        }         
                         // cv::circle(dst,cv::Point(result[i*3],result[i*3+1]),2,cv::Scalar(0,255,0),-1);
                         // putText(dst, to_string(i), cv::Point(result[i*3],result[i*3+1]), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
                     }
-                    
+                    cout<<"total_confidence"<<total_confidence/non_zero_confidence_num<<endl;                   
                 }
-
+//                std::cout<<"before skeleton_tracker"<<std::endl;
+                skeleton_tracker.skeletons_track(keypoints);
+//                std::cout<<"after skeleton_tracker"<<std::endl;
+                skeleton_tracker.draw_skeletons(dst,0.05);
+//                std::cout<<"after skeleton_draw"<<std::endl;
+                
+              
 
                 
                 

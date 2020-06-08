@@ -1,2 +1,0 @@
-/usr/bin/ar qc libkalman_track.a  CMakeFiles/kalman_track.dir/KalmanTracker.cpp.o CMakeFiles/kalman_track.dir/myFunction.cpp.o
-/usr/bin/ranlib libkalman_track.a

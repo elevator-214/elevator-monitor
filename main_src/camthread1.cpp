@@ -70,6 +70,7 @@ CamThread1 :: ~CamThread1()
 
 void CamThread1 :: run()
 {
+    //while(true);
     //取一些参数的地址,下面保存参数和加载参数的时候要用到.
     const int cam1_paras_pp_num=5;
     int *cam1_pp_paras[cam1_paras_pp_num*2]={&(ppROI.x),&(ppROI.y),&(ppROI.width),&(ppROI.height),(&ppFlowLine),

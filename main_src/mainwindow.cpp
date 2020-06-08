@@ -150,7 +150,14 @@ void MainWindow::on_actionHand_ROI_2_triggered()
     Dlg_2->load_text();
     Dlg_5->show();
 }
-
+void MainWindow::set_mode()
+{
+    system("sudo /usr/sbin/nvpmodel -m 0");//set xavier Fan Mode:maxn
+	system("sudo /usr/sbin/nvpmodel -d cool");//set xavier Power Mode:cool quiet
+	system("sudo sh -c \"echo 255 > /sys/devices/pwm-fan/target_pwm\"&&./.,");//set xavier Fan PWM to max 255
+	system("sudo /usr/sbin/nvpmodel -q");//print Fan Mode,Power Mode
+	system("echo fan_pwm set to:$(cat /sys/devices/pwm-fan/target_pwm)");//print Fan PWM
+}
 void MainWindow::on_actionLoad_all_parameter_triggered()
 {
     /*加载参数*/

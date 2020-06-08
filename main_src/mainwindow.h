@@ -9,7 +9,10 @@
 #include "camthread4.h"
 #include "communication.h"
 #include <unistd.h>
-
+#pragma push_macro("slots")
+#undef slots
+#include<python3.6/Python.h>
+#pragma pop_macro("slots")
 
 #include <bitset>
 
@@ -32,7 +35,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-
+    void set_mode();
 private slots:
     void showImage1(QImage img);
     void showImage2(QImage img);
@@ -51,6 +54,8 @@ private slots:
     void on_actionHand_ROI_1_triggered();
 
     void on_actionHand_ROI_2_triggered();
+
+    
 
     void on_actionLoad_all_parameter_triggered();
 
@@ -93,7 +98,7 @@ private slots:
     void on_actionStart_cam3_triggered();
 
     void on_actionStart_cam4_triggered();
-
+    
 private:
     Ui::MainWindow *ui;
     CamThread1 cam1;
