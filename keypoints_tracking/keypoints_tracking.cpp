@@ -389,7 +389,7 @@ void Skeleton_Tracking::skeletons_track(std::vector<std::vector<double>>detected
     calculate_Distance_matrix(detected_keypoints,tracking_keypoints,bones_info,Distance_Matrix,Distance_Matrix_reverse);
     //首先根据距离来对矩形框进行滤波,如果骨架距离超过阈值，需要另外计算，如果在检测结果中，则当作新检测目标加入，如果在跟踪列表中，则当作离开的目标进行去除
     std::vector<int>choose_rows,choose_cols;
-    const double distance_threshold=oks_max*4.0/10.0;//距离超过distance_threshold的将其另外考虑
+    const double distance_threshold=oks_max*9.9/10.0;//距离超过distance_threshold的将其另外考虑
     for(int i=0;i<rows;i++)//先把所有检测结果的序号都放到choose_rows中，后续再进行剔除
         choose_rows.push_back(i);
     for(int i=0;i<cols;i++)//先把所有跟踪目标的序号都放到choose_cols中，后续再进行剔除
