@@ -27,7 +27,7 @@ static double calculate_OKS(Keypoints skeleton1,Keypoints skeleton2,std::vector<
     //计算oks，但由于是跟踪用，并没有真实值，因此对OKS进行了自定义，用另一种距离方式来计算两个骨架之间的距离，详情见小论文
     //当两个骨架越不相似时，自定义的oks越大 oks最大时为keypoints_num*keypoint_oks_max+box_oks_max=14×1.0+5.0=19.0
     int keypoints_num=skeleton1.keypoints_num;
-    double distance_square_thres=40*40;//距离平方阈值，如果两个骨架的相同关键点欧式距离平方超过这个阈值，则oks+=1
+    double distance_square_thres=60*60;//距离平方阈值，如果两个骨架的相同关键点欧式距离平方超过这个阈值，则oks+=1
     double confidence_thres=0.05;//置信度阈值，如果两个骨架的相同关键点中的某一个置信度小于这个阈值，则oks+=1
     double keypoint_oks_max=1.0;
     double box_square_thres=60*60;//矩形框中心距离阈值，如果超过这个阈值，则oks+=box_oks_max
@@ -36,21 +36,27 @@ static double calculate_OKS(Keypoints skeleton1,Keypoints skeleton2,std::vector<
     double oks=0.0;
     for(int i=0;i<keypoints_num;i++)
     {
-        if((skeleton1.C)[i]>confidence_thres&&(skeleton2.C)[i]>confidence_thres)//一直检测到
+        if((skeleton1.C)[i]>confidence_thres&&(skeleton2.C)[i]>confidence_thres)//一直检测到 高置信度点
         {
             double euclidean_distance=((skeleton1.X)[i]-(skeleton2.X)[i])*((skeleton1.X)[i]-(skeleton2.X)[i])+
                                       ((skeleton1.Y)[i]-(skeleton2.Y)[i])*((skeleton1.Y)[i]-(skeleton2.Y)[i]);
             oks+=(keypoint_oks_max*std::min(euclidean_distance,distance_square_thres)/distance_square_thres);//即此时每个关键点距离最多使得oks增加keypoint_oks_max，在distance_square_thres取得keypoint_oks_max。距离越远，增加越快，要增加得更快可以使用三次方      
         }
-        else if(abs((skeleton1.C)[i]-0.0)<0.0001&&(skeleton2.C)[i]>confidence_thres)//突然没检测到 遮挡变严重
+        else if((skeleton1.C)[i]<confidence_thres&&(skeleton1.C)[i]>0.0001&&(skeleton2.C)[i]<confidence_thres&&(skeleton2.C)[i]>0.0001)//低置信度点 为了oks尽量可靠，置信度低的点感觉可以尽量少参与其中
+        {
+            double euclidean_distance=((skeleton1.X)[i]-(skeleton2.X)[i])*((skeleton1.X)[i]-(skeleton2.X)[i])+
+                                      ((skeleton1.Y)[i]-(skeleton2.Y)[i])*((skeleton1.Y)[i]-(skeleton2.Y)[i]);
+            oks+=(0.5*keypoint_oks_max*std::min(euclidean_distance,distance_square_thres)/distance_square_thres);
+        }
+        else if((skeleton1.C)[i]<0.0001&&(skeleton2.C)[i]>confidence_thres)//突然没检测到 遮挡变严重
         {
             oks+=0.0;
         }
-        else if((skeleton1.C)[i]>confidence_thres&&abs((skeleton2.C)[i]-0.0)<0.0001)//突然检测到 遮挡减缓
+        else if((skeleton1.C)[i]>confidence_thres&&(skeleton2.C)[i]<0.0001)//突然检测到 遮挡减缓
         {
             oks+=0.0;//oks不变
         }
-        else if(abs((skeleton1.C)[i]-0.0)<0.0001&&abs((skeleton2.C)[i]-0.0)<0.0001)//一直没检测到
+        else if((skeleton1.C)[i]<0.0001&&(skeleton2.C)[i]<0.0001)//一直没检测到
         {
             oks+=0.0;//oks不变
         }
@@ -63,14 +69,13 @@ static double calculate_OKS(Keypoints skeleton1,Keypoints skeleton2,std::vector<
     
     //计算骨架枝干距离
     int bones_num=bones_info.size()/2;
-    double keypoint_square_thres=60*60;
-    double line_distance_thres=45;
-    double oks_bones=4.0;//如果有一条枝干相似，则oks-=oks_bones
+    double keypoint_square_thres=45*45;
+    double line_distance_thres=30;
+    double oks_bones=1.5;//如果有一条枝干相似，则oks-=oks_bones
     for(int i=0;i<bones_num;i++)
     {
         const int keypoint1_id=bones_info[2*i];
         const int keypoint2_id=bones_info[2*i+1];
-        const double confidence_thres=0.01;
         double person1_keypoint1_c=(skeleton1.C)[keypoint1_id];
         double person1_keypoint2_c=(skeleton1.C)[keypoint2_id];
         double person2_keypoint1_c=(skeleton2.C)[keypoint1_id];
@@ -89,31 +94,29 @@ static double calculate_OKS(Keypoints skeleton1,Keypoints skeleton2,std::vector<
             
             double line_distance=Min_Line_Distance(cv::Point(person1_keypoint1_x,person1_keypoint1_y),cv::Point(person1_keypoint2_x,person1_keypoint2_y),
                                                    cv::Point(person2_keypoint1_x,person2_keypoint1_y),cv::Point(person2_keypoint2_x,person2_keypoint2_y));
-            //double keypoint1_square_distance=(person1_keypoint1_x-person2_keypoint1_x)*(person1_keypoint1_x-person2_keypoint1_x)+
-     //                                        (person1_keypoint1_y-person2_keypoint1_y)*(person1_keypoint1_y-person2_keypoint1_y);
-    //        double keypoint2_square_distance=(person1_keypoint2_x-person2_keypoint2_x)*(person1_keypoint2_x-person2_keypoint2_x)+
-       //                                      (person1_keypoint2_y-person2_keypoint2_y)*(person1_keypoint2_y-person2_keypoint2_y);
-    //        if(keypoint1_square_distance<keypoint_square_thres&&keypoint2_square_distance<keypoint_square_thres)
-                
-            //if(line_distance<line_distance_thres)
-            //{
-                
-            //计算直线枝干直线夹角
-            double k1=(person1_keypoint2_y-person1_keypoint1_y)/(person1_keypoint2_x-person1_keypoint1_x);
-            double k2=(person2_keypoint2_y-person2_keypoint1_y)/(person2_keypoint2_x-person2_keypoint1_x);
-            double theta=acos(abs((1+k1*k2)/(sqrt(1+k1*k1)*sqrt(1+k2*k2))));
-            theta=theta*180/M_PI;
-            if(theta<30)
-            {       
-                oks-=oks_bones;
-//                if(i==6)
-//                {
-//                    std::cout<<"line_distance:"<<line_distance<<std::endl;
-//                    std::cout<<"theta:"<<theta<<std::endl; 
-//                    std::cout<<"oks:"<<oks<<std::endl;                          
-//                }
+            double keypoint1_square_distance=(person1_keypoint1_x-person2_keypoint1_x)*(person1_keypoint1_x-person2_keypoint1_x)+
+                                            (person1_keypoint1_y-person2_keypoint1_y)*(person1_keypoint1_y-person2_keypoint1_y);
+            double keypoint2_square_distance=(person1_keypoint2_x-person2_keypoint2_x)*(person1_keypoint2_x-person2_keypoint2_x)+
+                                            (person1_keypoint2_y-person2_keypoint2_y)*(person1_keypoint2_y-person2_keypoint2_y);
+
+            if(line_distance<line_distance_thres&&std::max(keypoint1_square_distance,keypoint2_square_distance)<keypoint_square_thres)
+            {              
+                //计算直线枝干直线夹角
+                double k1=(person1_keypoint2_y-person1_keypoint1_y)/(person1_keypoint2_x-person1_keypoint1_x);
+                double k2=(person2_keypoint2_y-person2_keypoint1_y)/(person2_keypoint2_x-person2_keypoint1_x);
+                double theta=acos(abs((1+k1*k2)/(sqrt(1+k1*k1)*sqrt(1+k2*k2))));
+                theta=theta*180/M_PI;
+                if(theta<30)
+                {       
+                    oks-=oks_bones;
+    //                if(i==6)
+    //                {
+    //                    std::cout<<"line_distance:"<<line_distance<<std::endl;
+    //                    std::cout<<"theta:"<<theta<<std::endl; 
+    //                    std::cout<<"oks:"<<oks<<std::endl;                          
+    //                }
+                }
             }
-            //}
            // std::cout<<std::endl;  
             
         }
@@ -300,7 +303,6 @@ void Single_Skeleton::person_predict()
     {//对每个关键点进行卡尔曼预测
         if((person_keypoints.C)[i]>kalman_confidence_thres)
         {
-            
             this->keypoints_kalmanfilter[i].predict();     
             (person_keypoints.X)[i]=double(this->keypoints_kalmanfilter[i].statePost.at<float>(0));
             (person_keypoints.Y)[i]=double(this->keypoints_kalmanfilter[i].statePost.at<float>(1));            
@@ -316,18 +318,13 @@ void Single_Skeleton::person_correct(Keypoints detected_keypoint)
     
     for(int i=0;i<keypoints_num;i++)
     {
-        if(abs((detected_keypoint.C)[i]-0.0)<0.0001)//如果该关键点检测失败，坐标会飞到左上角
-        {
-           // std::cout<<"fly!!!"<<(detected_keypoint.C)[i]<<std::endl;
-           
-            (person_keypoints.C)[i]=(detected_keypoint.C)[i]; 
-            continue;
-        }
-           
-        cv::Mat point_mat = (cv::Mat_<float>(2, 1) << (detected_keypoint.X)[i], (detected_keypoint.Y)[i]);
-        keypoints_kalmanfilter[i].correct(point_mat);
-        (person_keypoints.X)[i]=(detected_keypoint.X)[i];
-        (person_keypoints.Y)[i]=(detected_keypoint.Y)[i];
+        if((detected_keypoint.C)[i]>kalman_confidence_thres)//如果该关键点检测成功使用检测结果来对跟踪结果更新
+        {  
+            cv::Mat point_mat = (cv::Mat_<float>(2, 1) << (detected_keypoint.X)[i], (detected_keypoint.Y)[i]);
+            keypoints_kalmanfilter[i].correct(point_mat);
+            (person_keypoints.X)[i]=(detected_keypoint.X)[i];
+            (person_keypoints.Y)[i]=(detected_keypoint.Y)[i];
+        }   
         (person_keypoints.C)[i]=(detected_keypoint.C)[i];        
     }
     add_trajectory(person_keypoints.center_point_update());//对骨架外界矩形进行更新

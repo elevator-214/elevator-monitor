@@ -7,6 +7,7 @@ huang.liguang@qq.com
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <algorithm>
 namespace hlg{
 extern int count_keypoints_num();
 
@@ -52,11 +53,16 @@ public:
     }
     cv::Point center_point_update()
     {
-        //对骨架外界矩形进行更新
-        this->center_point.x=(*std::min_element(X.begin(),X.end())+
-                            *std::max_element(X.begin(),X.end()))/2;
-        this->center_point.y=(*std::min_element(Y.begin(),Y.end())+
-                            *std::max_element(Y.begin(),Y.end()))/2;
+        //对骨架外界矩形进行更新 在此之前，需要对没检测出来的点进行滤除
+        std::vector<double> X_temp=X;
+        std::vector<double> Y_temp=Y;
+        sort(X_temp.begin(),X_temp.end(),[](const double &x, const double &y){return x>y;});//逆序
+        sort(Y_temp.begin(),Y_temp.end(),[](const double &x, const double &y){return x>y;});//逆序
+
+        this->center_point.x=(*(--find(X_temp.begin(), X_temp.end(),0))+
+                            X_temp[0])/2;
+        this->center_point.y=(*(--find(Y_temp.begin(), Y_temp.end(),0))+
+                            Y_temp[0])/2;
         return center_point;
     }
     int keypoints_num;
@@ -90,7 +96,7 @@ public:
     void add_trajectory(cv::Point point);//把点添加到轨迹中
 
     //构造函数
-    Single_Skeleton(int id,int keypoints_num,Keypoints keypoints,double kalman_confidence_thres=0.05);
+    Single_Skeleton(int id,int keypoints_num,Keypoints keypoints,double kalman_confidence_thres=0.005);
     ~Single_Skeleton(){}
     void confidenceIncrease()
     {
