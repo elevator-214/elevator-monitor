@@ -24,17 +24,7 @@ This project is implemented in C++ and uses QT for interface interaction. Just a
 
 ## Pre-installation required
 
-**CUDA**
-
-**cudnn**
-
-**TensorRT6** 
-
-**Boost** 
-
-**QT5** 
-
-**OpenCV4.2**
+**CUDA、cudnn、TensorRT6、Boost、QT5、OpenCV4.2**
 
 ## Install the Project
 ```
