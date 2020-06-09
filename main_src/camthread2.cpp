@@ -219,7 +219,11 @@ void CamThread2 :: run()
                         const int index=keypoint_ids[j];
                         const double x=result[value_per_person*i+3*index];
                         const double y=result[value_per_person*i+3*index+1];
-                        const double confidence=result[value_per_person*i+3*index+2];
+                        double confidence=result[value_per_person*i+3*index+2];
+                        if(x<1&&y<1)//将不可靠点的置信度置0
+                        {
+                            confidence=0.0;
+                        }
                         keypoints[i][3*j]=x;
                         keypoints[i][3*j+1]=y;
                         keypoints[i][3*j+2]=confidence;

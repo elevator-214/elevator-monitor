@@ -23,7 +23,7 @@ double dot(cv::Point2f A, cv::Point2f B, cv::Point2f P)         //向量AB与向
 }
 double dis2(cv::Point2f a, cv::Point2f b)                //点a、b距离的平方
 {
-    return (a.x - b.x)*(a.x - b.x) + (a.y - b.y)*(a.y - b.y);
+    return double(a.x - b.x)*double(a.x - b.x) + double(a.y - b.y)*double(a.y - b.y);
 }
 int dir(cv::Point2f A, cv::Point2f B, cv::Point2f P)            //点P与线段AB位置关系
 {
@@ -38,7 +38,7 @@ int dir(cv::Point2f A, cv::Point2f B, cv::Point2f P)            //点P与线段A
 }
 double disMin(cv::Point2f A, cv::Point2f B, cv::Point2f P)      //点P到线段AB的最短距离
 {
-    double r = ((P.x - A.x)*(B.x - A.x) + (P.y - A.y)*(B.y - A.y)) / dis2(A, B);
+    double r = (double(P.x - A.x)*double(B.x - A.x) + double(P.y - A.y)*double(B.y - A.y)) / dis2(A, B);
     if (r <= 0) return sqrt(dis2(A, P));
     else if (r >= 1) return sqrt(dis2(B, P));
     else
@@ -49,7 +49,9 @@ double disMin(cv::Point2f A, cv::Point2f B, cv::Point2f P)      //点P到线段A
 }
 double Min_Line_Distance(cv::Point2f A1,cv::Point2f A2,cv::Point2f B1,cv::Point2f B2)
 {
-    return std::min(std::min(std::min(disMin(A1, A2, B1), disMin(A1, A2, B2)), disMin(B1, B2, A1)), disMin(B1, B2, A2));
+    if (dir(A1, A2, B1)*dir(A1, A2, B2) <= 0 && dir(B1, B2, A1)*dir(B1, B2, A2) <= 0)  //两线段相交, 距离为0
+        return 0.0; 
+    else
+        return std::min(std::min(std::min(disMin(A1, A2, B1), disMin(A1, A2, B2)), disMin(B1, B2, A1)), disMin(B1, B2, A2));
 }
 }
-

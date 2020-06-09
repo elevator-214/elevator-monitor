@@ -145,7 +145,7 @@ public:
     std::vector<Single_Skeleton>people_skeletons;//包含了多个人
     
     void skeletons_track(std::vector<std::vector<double>>detected_skeletons);//跟踪！
-    void draw_skeletons(cv::Mat img,double confidence_thres=0.05,bool draw_trajectory=false);
+    void draw_skeletons(cv::Mat img,double confidence_thres=0.2,bool draw_trajectory=false);
     std::vector<bool> idTabel;
     void idTabelUpdate(int id);
     int idCreator();
