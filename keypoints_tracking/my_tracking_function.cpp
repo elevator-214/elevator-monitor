@@ -9,6 +9,14 @@ huang.liguang@qq.com
 #include<algorithm>
 // using namespace std;
 namespace hlg{
+//图片长宽
+const double img_width=640.0;
+const double img_height=480.0;
+void x_y_limit(double&x,double&y)
+{
+    x=std::min(std::max(x,0.0),img_width-1);
+    y=std::min(std::max(y,0.0),img_height-1);
+}
 double cross(cv::Point2f A, cv::Point2f B, cv::Point2f P)      //向量AB与向量AP的外积
 {
     cv::Point2f AB(B.x - A.x, B.y - A.y);

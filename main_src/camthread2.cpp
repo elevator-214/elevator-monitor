@@ -211,7 +211,8 @@ void CamThread2 :: run()
                 std::vector<std::vector<double>>keypoints(people_num,std::vector<double>(keypoints_num_track*3));
                 double total_confidence=0.0;
                 int non_zero_confidence_num=0;
-                for(size_t i=0;i<result.size()/value_per_person;++i) {
+                std::vector<int>person_need_delete;//将检测关键点数少的行人 以及平均置信度低的行人滤除掉
+                for(int i=0;i<result.size()/value_per_person;++i) {
                     total_confidence=0.0;
                     non_zero_confidence_num=0;
                     for(int j=0;j<keypoints_num_track;++j)
@@ -227,7 +228,7 @@ void CamThread2 :: run()
                         keypoints[i][3*j]=x;
                         keypoints[i][3*j+1]=y;
                         keypoints[i][3*j+2]=confidence;
-                        if(abs(confidence-0)>0.000001)
+                        if(abs(confidence)>0.001)
                         {
                             total_confidence+=confidence;
                             non_zero_confidence_num+=1;
@@ -235,12 +236,20 @@ void CamThread2 :: run()
                         // cv::circle(dst,cv::Point(result[i*3],result[i*3+1]),2,cv::Scalar(0,255,0),-1);
                         // putText(dst, to_string(i), cv::Point(result[i*3],result[i*3+1]), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
                     }
-                    cout<<"total_confidence"<<total_confidence/non_zero_confidence_num<<endl;                   
+                    double average_confidence=total_confidence/non_zero_confidence_num;
+                    if(non_zero_confidence_num<4||average_confidence<0.30)
+                        person_need_delete.push_back(i);
+                    //cout<<"total_confidence"<<total_confidence<<" num:"<<non_zero_confidence_num<<" average confidence"<<total_confidence/non_zero_confidence_num<<endl;                   
                 }
+                for(int i=person_need_delete.size()-1;i>=0;i--)
+                {
+                    keypoints.erase(keypoints.begin()+person_need_delete[i]);
+                }
+                //cout<<endl; 
 //                std::cout<<"before skeleton_tracker"<<std::endl;
                 skeleton_tracker.skeletons_track(keypoints);
 //                std::cout<<"after skeleton_tracker"<<std::endl;
-                skeleton_tracker.draw_skeletons(dst,0.05);
+                skeleton_tracker.draw_skeletons(dst,0.2,true);
 //                std::cout<<"after skeleton_draw"<<std::endl;
                 
               

@@ -61,12 +61,12 @@ static double calculate_OKS(Keypoints skeleton1,Keypoints skeleton2,std::vector<
         }
                    
     }
-    std::cout<<std::endl<<"keypoint_oks:"<<oks<<std::endl;
+    //std::cout<<std::endl<<"keypoint_oks:"<<oks<<std::endl;
     //使用二次函数，这样可以满足外接矩形框距离远的时候，oks增加地快一些，距离近的时候oks增加地慢一些
     double center_distance_square=(skeleton1.center_point.x-skeleton2.center_point.x)*(skeleton1.center_point.x-skeleton2.center_point.x)+
                            (skeleton1.center_point.y-skeleton2.center_point.y)*(skeleton1.center_point.y-skeleton2.center_point.y);
     oks+=(box_oks_max*std::min(center_distance_square,box_square_thres)/box_square_thres);//即此时矩形框中心最多使得oks增加box_oks_max，距离越远，增加越快，要增加得更快可以使用三次方
-    std::cout<<"center_distance_square:"<<center_distance_square<<"center_oks"<<oks<<std::endl;
+    //std::cout<<"center_distance_square:"<<center_distance_square<<"center_oks"<<oks<<std::endl;
     //计算骨架枝干距离
     int bones_num=bones_info.size()/2;
     double keypoint_square_thres=55*55;
@@ -116,7 +116,7 @@ static double calculate_OKS(Keypoints skeleton1,Keypoints skeleton2,std::vector<
     //                    std::cout<<"oks:"<<oks<<std::endl;                          
     //                }
                 }
-                std::cout<<"bones_num"<<bones_num<<" line_distance:"<<line_distance<<" theta"<<theta<<std::endl;
+               // std::cout<<"bones_num"<<bones_num<<" line_distance:"<<line_distance<<" theta"<<theta<<std::endl;
             }
            // std::cout<<std::endl;  
             
@@ -125,7 +125,7 @@ static double calculate_OKS(Keypoints skeleton1,Keypoints skeleton2,std::vector<
         
     }
     
-    std::cout<<"final_oks:"<<oks<<std::endl;
+    //std::cout<<"final_oks:"<<oks<<std::endl;
     std::max(0.0,oks);
     
     return oks;
@@ -133,13 +133,13 @@ static double calculate_OKS(Keypoints skeleton1,Keypoints skeleton2,std::vector<
 static void calculate_Distance_matrix(std::vector<Keypoints>detected_keypoints,std::vector<Keypoints>tracking_keypoints,std::vector<int>bones,std::vector<std::vector<double>>&Distance_Matrix,std::vector<std::vector<double>>&Distance_Matrix_Reverse)
 {
     //std::cout<<"rows"<<Distance_Matrix.size()<<"cols"<<Distance_Matrix[0].size()<<std::endl;
-    std::cout<<std::endl<<"next frame "<<"det"<<detected_keypoints.size()<<" track"<<tracking_keypoints.size()<<std::endl;
+    //std::cout<<std::endl<<"next frame "<<"det"<<detected_keypoints.size()<<" track"<<tracking_keypoints.size()<<std::endl;
     
     for(int row=0;row<Distance_Matrix.size();row++)
     {
         for(int col=0;col<Distance_Matrix[0].size();col++)
         {
-            std::cout<<"row:"<<row<<"col"<<col<<std::endl; 
+            //std::cout<<"row:"<<row<<"col"<<col<<std::endl; 
             Distance_Matrix[row][col]=calculate_OKS(detected_keypoints[row],tracking_keypoints[col],bones);//oks越小,距离越大
             //std::cout<<"oks:"<<Distance_Matrix[row][col]<<std::endl; 
             //std::cout<<Distance_Matrix[row][col]<<" ";
@@ -271,7 +271,7 @@ Single_Skeleton::Single_Skeleton(int id,int keypoints_num,Keypoints keypoints,do
     {
         keypoints_kalmanfilter[i].statePre = cv::Mat::zeros(4, 1, CV_32F);
         keypoints_kalmanfilter[i].statePost = cv::Mat::zeros(4, 1, CV_32F);   //x
-        if((person_keypoints.C)[i]==0.0)
+        if((person_keypoints.C)[i]==0.0)//x y c =0
         {
             keypoints_kalmanfilter[i].statePost.at<float>(0) = 0.0;
             keypoints_kalmanfilter[i].statePost.at<float>(1) = 0.0;
@@ -314,9 +314,13 @@ void Single_Skeleton::person_predict()
     {//对每个关键点进行卡尔曼预测
         if((person_keypoints.C)[i]>kalman_confidence_thres)
         {
-            this->keypoints_kalmanfilter[i].predict();     
+            this->keypoints_kalmanfilter[i].predict();
+                 
             (person_keypoints.X)[i]=double(this->keypoints_kalmanfilter[i].statePost.at<float>(0));
-            (person_keypoints.Y)[i]=double(this->keypoints_kalmanfilter[i].statePost.at<float>(1));            
+            (person_keypoints.Y)[i]=double(this->keypoints_kalmanfilter[i].statePost.at<float>(1));
+            x_y_limit((person_keypoints.X)[i],(person_keypoints.Y)[i]);
+            keypoints_kalmanfilter[i].statePost.at<float>(0)=(person_keypoints.X)[i];  
+            keypoints_kalmanfilter[i].statePost.at<float>(1)=(person_keypoints.Y)[i];         
         }
         
       
@@ -331,10 +335,25 @@ void Single_Skeleton::person_correct(Keypoints detected_keypoint)
     {
         if((detected_keypoint.C)[i]>kalman_confidence_thres)//如果该关键点检测成功使用检测结果来对跟踪结果更新
         {  
-            if((person_keypoints.C)[i]==0.0)//之前该关键点置信度为0 先对kalman坐标初始化
+            x_y_limit((detected_keypoint.X)[i],(detected_keypoint.Y)[i]);
+            if((person_keypoints.C)[i]==0.0)//之前该关键点置信度为0 先对kalman坐标以及一些参数初始化
             {
                 keypoints_kalmanfilter[i].statePost.at<float>(0) = (detected_keypoint.X)[i];
                 keypoints_kalmanfilter[i].statePost.at<float>(1) = (detected_keypoint.Y)[i];
+                
+                keypoints_kalmanfilter[i].errorCovPre = cv::Mat::zeros(4, 4, CV_32F);
+                keypoints_kalmanfilter[i].errorCovPost = cv::Mat::zeros(4, 4, CV_32F);    //P
+                setIdentity(keypoints_kalmanfilter[i].errorCovPost, cv::Scalar::all(1));
+                keypoints_kalmanfilter[i].processNoiseCov = cv::Mat::eye(4, 4, CV_32F);   //Q
+                setIdentity(keypoints_kalmanfilter[i].processNoiseCov, cv::Scalar::all(1e-3));
+                keypoints_kalmanfilter[i].measurementNoiseCov = cv::Mat::eye(2, 2, CV_32F);   //R
+                setIdentity(keypoints_kalmanfilter[i].measurementNoiseCov, cv::Scalar::all(1e-6));
+
+                keypoints_kalmanfilter[i].temp1.create(4, 4, CV_32F);
+                keypoints_kalmanfilter[i].temp2.create(2, 4, CV_32F);
+                keypoints_kalmanfilter[i].temp3.create(2, 2, CV_32F);
+                keypoints_kalmanfilter[i].temp4.create(2, 4, CV_32F);
+                keypoints_kalmanfilter[i].temp5.create(2, 1, CV_32F);
             }
             else
             {
@@ -500,12 +519,18 @@ void Skeleton_Tracking::draw_skeletons(cv::Mat img,double confidence_thres,bool 
             // std::cout<<confidence1<<" "<<confidence2<<std::endl;
             if(std::min(confidence1,confidence2)>confidence_thres)
             {
-                const double point1_x=((people_skeletons[i].person_keypoints).X)[index1];
-                const double point1_y=((people_skeletons[i].person_keypoints).Y)[index1];
-                const double point2_x=((people_skeletons[i].person_keypoints).X)[index2];
-                const double point2_y=((people_skeletons[i].person_keypoints).Y)[index2];
+                double point1_x=((people_skeletons[i].person_keypoints).X)[index1];
+                double point1_y=((people_skeletons[i].person_keypoints).Y)[index1];
+                double point2_x=((people_skeletons[i].person_keypoints).X)[index2];
+                double point2_y=((people_skeletons[i].person_keypoints).Y)[index2];
+                x_y_limit(point1_x,point1_y);
+                x_y_limit(point2_x,point2_y);
                 if(point1_x<1&&point1_y<1||point2_x<1&&point2_y<1)
+                {
                     std::cout<<"person:"<<i<<"color:"<<color<<" "<<"error confidence:"<<confidence1<<" "<<confidence2<<std::endl;
+                    std::cout<<"point1_x:"<<point1_x<<" "<<point1_y<<" "<<" point2:"<<point2_x<<" "<<point2_y<<std::endl;
+                }
+                    
                 const cv::Point point1(point1_x,point1_y);                       
                 const cv::Point point2(point2_x,point2_y);
                 cv::line(img,point1,point2, color, 2 );

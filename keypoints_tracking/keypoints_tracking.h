@@ -94,7 +94,8 @@ public:
     int max_trajectory_size=50;//最多保留历史50帧的中心轨迹
     std::vector<cv::Point> trajectory;//历史轨迹
     void add_trajectory(cv::Point point);//把点添加到轨迹中
-
+    
+    
     //构造函数
     Single_Skeleton(int id,int keypoints_num,Keypoints keypoints,double kalman_confidence_thres=0.005);
     ~Single_Skeleton(){}

@@ -92,7 +92,7 @@ bool MyKalmanFilter::confidenceDecrease()
     {
         confidence -= pow(2.0f, (confidence_dec-6));
     }
-    cout<<"de confidence:"<<confidence<<endl;
+    //cout<<"de confidence:"<<confidence<<endl;
     if (confidence < 0)
     {
         confidence = 0;
