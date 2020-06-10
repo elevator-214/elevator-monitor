@@ -1,8 +1,8 @@
 add_definitions ( -Wall -g )
 set(CMAKE_FIND_DEBUG_MODE 1)
-
-find_package ( PythonLibs 3.6 REQUIRED)
-if(PythonLibs_FOUND)
+set(Python_ADDITIONAL_VERSIONS 3.5)
+find_package (PythonLibs REQUIRED)
+if(PythonLibs)
     message(STATUS "PYTHON_LIBRARIES:${PYTHON_LIBRARIES}+++")
     message(STATUS "PYTHON_INCLUDE_DIRS:${PYTHON_INCLUDE_DIRS}+++")
     message(STATUS "PYTHONLIBS_VERSION_STRING:${PYTHONLIBS_VERSION_STRING}+++")
@@ -53,7 +53,7 @@ set ( elevator_monitor_UIS
         dialog_4.ui
         dialog_5.ui
         )
-QT5_WRAP_UI(UIS ${elevator_monitor_UIS})
+# QT5_WRAP_UI(UIS ${elevator_monitor_UIS})
 
 set ( elevator_monitor_MOCS
         mainwindow.h
@@ -68,11 +68,11 @@ set ( elevator_monitor_MOCS
         dialog_4.h
         dialog_5.h
         )
-QT5_WRAP_CPP(MOCS ${elevator_monitor_MOCS})
+# QT5_WRAP_CPP(MOCS ${elevator_monitor_MOCS})
 
+CMAKE_POLICY(SET CMP0071 NEW)
 
-
-add_executable ( elevator_monitor ${elevator_monitor_SRCS} ${UIS} ${RSCS} ${TRS} ${MOCS} )
+add_executable ( elevator_monitor ${elevator_monitor_SRCS} ${elevator_monitor_HDRS} ${elevator_monitor_UIS} ${elevator_monitor_MOCS} )
 target_link_libraries ( elevator_monitor PUBLIC
     -Wl,--start-group
     read_parameter

@@ -11,7 +11,7 @@
 #include <unistd.h>
 #pragma push_macro("slots")
 #undef slots
-#include<python3.6/Python.h>
+#include<python3.5m/Python.h>
 #pragma pop_macro("slots")
 
 #include <bitset>

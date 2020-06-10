@@ -9,7 +9,7 @@ Including:
 - Human Keypoints Extraction and Tracking in elevator
 - Detection of object sticking out of handrail
 
-This project is implemented in C++ and uses QT for interface interaction. Just a student project made by a total newb ,so feel free to ask and don’t expect too much. Test on Jetson Xavier. It should also work on ubuntu x86/64.
+This project is implemented in C++ and uses QT for interface interaction. Just a student project made by a total newb ,so feel free to ask and don’t expect too much. Test on X64 Ubuntu 16.04. 
 
 ## TO DO LIST
 
