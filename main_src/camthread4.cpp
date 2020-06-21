@@ -30,10 +30,8 @@ CamThread4 :: CamThread4()
 {
     CAMERA_WIDTH = hlg::cam4_CAMERA_WIDTH;
     CAMERA_HEIGHT = hlg::cam4_CAMERA_HEIGHT;
-   // CAMERA_NUM = 6;
-//    CAMERA_NUM = 1;
-    CAMERA_NUM = hlg::cam4_CAMERA_NUM;
-    CAMERA_STOP = hlg::cam4_CAMERA_WIDTH;
+    CAMERA_NUM = hlg::cam4_CAMERA_NUM;//其实和右上角摄像头号是一样的
+    CAMERA_STOP = false;
     fmMinue =hlg::cam4_fmMinue;
 
     //hdROI

@@ -52,6 +52,9 @@ target_include_directories(tinytrt PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(BUILD_PYTHON)
   message(STATUS "Build python")
+  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/media/scut214/data/HLG/cmake-3.14.4-Linux-x86_64/share/cmake-3.14/Modules")
+  message(STATUS "Build python" ${CMAKE_MODULE_PATH})
+
   set(Python3_ROOT_DIR /usr/bin)
   find_package(Python3 REQUIRED)
   include_directories(${PYTHON_INCLUDE_DIRS})

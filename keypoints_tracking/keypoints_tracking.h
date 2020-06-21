@@ -51,7 +51,7 @@ public:
         }
         center_point_update();
     }
-    cv::Point center_point_update()
+    cv::Point2d center_point_update()
     {
         //对骨架外界矩形进行更新 在此之前，需要对没检测出来的点进行滤除
         std::vector<double> X_temp=X;
@@ -59,17 +59,22 @@ public:
         sort(X_temp.begin(),X_temp.end(),[](const double &x, const double &y){return x>y;});//逆序
         sort(Y_temp.begin(),Y_temp.end(),[](const double &x, const double &y){return x>y;});//逆序
 
-        this->center_point.x=(*(--find(X_temp.begin(), X_temp.end(),0))+
-                            X_temp[0])/2;
-        this->center_point.y=(*(--find(Y_temp.begin(), Y_temp.end(),0))+
-                            Y_temp[0])/2;
+        cv::Point2d left_top(*(--find(X_temp.begin(), X_temp.end(),0)),
+                                *(--find(Y_temp.begin(), Y_temp.end(),0)));
+        cv::Point2d right_bottom(X_temp[0],Y_temp[0]);
+        this->center_point.x=(left_top.x+right_bottom.x)/2;
+        this->center_point.y=(left_top.y+right_bottom.y)/2;
+        // if(this->center_point.y<1&&this->center_point.x<1)
+        //     std::cout<<"!!!!!!@!@!@!"<<std::endl;
+        exter_rect=cv::Rect2d(left_top,right_bottom);
         return center_point;
     }
     int keypoints_num;
     std::vector<double> X;
     std::vector<double> Y;
     std::vector<double> C;
-    cv::Point center_point;//外接矩形框中心
+    cv::Point2d center_point;//外接矩形框中心
+    cv::Rect2d exter_rect;//外接矩形框
 };
 
 class Single_Skeleton
@@ -92,8 +97,8 @@ public:
     
     //外接矩形的中心轨迹
     int max_trajectory_size=50;//最多保留历史50帧的中心轨迹
-    std::vector<cv::Point> trajectory;//历史轨迹
-    void add_trajectory(cv::Point point);//把点添加到轨迹中
+    std::vector<cv::Point2d> trajectory;//历史轨迹
+    void add_trajectory(cv::Point2d point);//把点添加到轨迹中
 
     //构造函数
     Single_Skeleton(int id,int keypoints_num,Keypoints keypoints,double kalman_confidence_thres=0.005);
@@ -115,7 +120,7 @@ public:
             confidence-=confidence_dec;
         else
         {
-            confidence -= pow(2.0f, (confidence_dec-6));
+            confidence -= pow(2.0f, (confidence_dec-2));
         }
         // cout<<"de confidence:"<<confidence<<endl;
         if (confidence < 0)
@@ -138,14 +143,16 @@ public:
         this->keypoints_num=keypoints_num;
         this->bones_info=bones_info;
         bones_num=bones_info.size()/2;
+        person_num=0;
     }
     std::vector<int>bones_info;//骨架连接信息
+    int person_num;//最终结果人数
     int keypoints_num;
     int bones_num;
     std::vector<Single_Skeleton>people_skeletons;//包含了多个人
     
     void skeletons_track(std::vector<std::vector<double>>detected_skeletons);//跟踪！
-    void draw_skeletons(cv::Mat img,double confidence_thres=0.2,bool draw_trajectory=false);
+    void draw_skeletons(cv::Mat img,double confidence_thres=0.2,bool draw_box=false,bool draw_trajectory=false,bool draw_id=false,int track_frame_thres=3);
     std::vector<bool> idTabel;
     void idTabelUpdate(int id);
     int idCreator();

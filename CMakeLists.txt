@@ -5,14 +5,16 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set( CMAKE_INCLUDE_CURRENT_DIR ON )
 set( CMAKE_AUTOMOC ON )
 
-#set( CMAKE_BUILD_TYPE Debug )
-#SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
-set( CMAKE_BUILD_TYPE Release )
+set( CMAKE_BUILD_TYPE Debug )
+SET(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+#set( CMAKE_BUILD_TYPE Release )
 # SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/build/lib)#static
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build/lib)#shared
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/build)#exeutable
+
+set(OpenCV_DIR /usr/local/opencv4.2/lib/cmake/opencv4)#qt
 
 find_package ( Qt5Widgets REQUIRED )
 find_package ( Qt5Core REQUIRED )

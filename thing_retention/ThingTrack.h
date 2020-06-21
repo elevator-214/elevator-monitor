@@ -7,17 +7,17 @@ namespace hlg
     {
     public:
         Thing(int id, const Rect &detected_box);
-        unsigned int track_frame;//����ƥ��ɹ�֡�����������һ����Ŀ�����ж�Ϊ����
-        int id;//id��
+        unsigned int track_frame;//连续匹配成功帧数，如果超过一定数目，则判断为滞留
+        int id;//id号
         bool confidenceDecrease();
         void confidenceIncrease();
-        Rect box;//��Ӿ��ο�
+        Rect box;//外接矩形框
     private:
-        double confidence;//���Ŷ�
+        double confidence;//置信度
         int confidence_inc;
         int confidence_dec;
     };
-    class ThingInterface::ThingTracker//�������ж�������������˸��˸о�û�б�Ҫʹ��kalman�����˶�����ͽ�����������ʰ�kalmanȥ���ˣ�������ƥ����Ȼ����
+    class ThingInterface::ThingTracker//由于是判断物体滞留，因此个人感觉没有必要使用kalman进行运动估计徒增计算量，故把kalman去除了，匈牙利匹配依然保留
     {
     public:
         ThingTracker(string thing_name = "th");

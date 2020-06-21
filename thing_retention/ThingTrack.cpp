@@ -85,7 +85,7 @@ namespace hlg
                 const Rect&rect_pp = people_boxes[j];
                 //const cv::Rect And = rect_th | rect_pp;
                 const cv::Rect Union = rect_th & rect_pp;
-                const double iou= double(Union.area()*1.0 / rect_pp.area());//ȥ����people_box�ص�����Ƚϴ��things_box
+                const double iou= double(Union.area()*1.0 / rect_pp.area());//去掉与people_box重叠面积比较大的检测things_box
                 // cout<<"det iou"<<iou<<endl;
                 if (iou > iou_threshold)
                 {
@@ -103,7 +103,7 @@ namespace hlg
                 const Rect&rect_pp = people_boxes[j];
                 //const cv::Rect And = rect_th | rect_pp;
                 const cv::Rect Union = rect_th_track & rect_pp;
-                const double iou= double(Union.area()*1.0 / rect_pp.area());//ȥ����people_box�ص�����Ƚϴ��things_box
+                const double iou= double(Union.area()*1.0 / rect_pp.area());//去掉与people_box重叠面积比较大的跟踪things_box
                 //  cout<<"track iou:"<<rect_th_track.area()<<" "<<Union.area()<<" "<<rect_pp.area()<<" "<<iou<<endl;
                 if (iou > iou_threshold)
                 {
@@ -120,7 +120,7 @@ namespace hlg
         vector<Rect>detected_rects = Thing_Detected;
         
         Filter_People(detected_rects,people_boxes);//根据人的位置，进行过滤
-        //����������
+        //计算距离矩阵
         std::vector<cv::Rect>tracking_boxes;
         for (int i = 0; i < tracking_things.size(); ++i)
             tracking_boxes.push_back(tracking_things[i].box);
@@ -130,24 +130,24 @@ namespace hlg
         vector<vector<BoxDistanceType>>Distance_Matrix_reverse(cols, vector<BoxDistanceType>(rows));
         calculate_Distance_matrix(detected_rects, tracking_boxes, Distance_Matrix, Distance_Matrix_reverse);
 
-        //���ȸ��ݾ������Ծ��ο�����˲�
+        //首先根据距离来对矩形框进行滤波
         vector<int>choose_rows, choose_cols;
-        const BoxDistanceType distance_threshold = 0.80;//���볬��0.99�Ľ������⿼�ǣ�����ڼ��������������壬�ڸ��ٶ�����Ҫ�޳�
+        const BoxDistanceType distance_threshold = 0.80;//距离超过0.99的将其另外考虑，如果在检测对列则当作新物体，在跟踪对列则要剔除
         for (int i = 0; i<rows; i++)
             choose_rows.push_back(i);
         for (int i = 0; i<cols; i++)
             choose_cols.push_back(i);
         Distance_matrix_Filter(Distance_Matrix, Distance_Matrix_reverse, distance_threshold,
             choose_rows, choose_cols);
-        //�����˲��Ľ�����õ��˲�֮��Ĵ�����������ƥ��ľ���
+        //根据滤波的结果，得到滤波之后的待用来匈牙利匹配的矩阵
         vector<vector<BoxDistanceType>>filtered_distanceMatrix;
         filtered_distanceMatrix = get_filtered_Matrix(Distance_Matrix, choose_rows, choose_cols);
 
-        //������ƥ��
+        //匈牙利匹配
         vector<vector<BoxDistanceType>>match_result_Matrix;
-        vector<pair<int, int>>pairs;//ƥ��ɹ��Ķ�
-        set<int>rows_set;//ƥ��ɹ�����
-        set<int>cols_set;//ƥ��ɹ�����
+        vector<pair<int, int>>pairs;//匹配成功的对
+        set<int>rows_set;//匹配成功的行
+        set<int>cols_set;//匹配成功的列
         if (filtered_distanceMatrix.size()>0)
         {
             Std2dVectorAdapter<BoxDistanceType>std2matrix;
@@ -156,12 +156,12 @@ namespace hlg
             m.solve(matrix);
             std2matrix.convertFromMatrix(match_result_Matrix, matrix);
 
-            //ƥ��֮����Ҫ�ҳ�ƥ��ɹ��Ķ�
+            //匹配之后需要找出匹配成功的对
             for (int row = 0; row<match_result_Matrix.size(); ++row)
             {
                 for (int col = 0; col<match_result_Matrix[0].size(); ++col)
                 {
-                    if (isequal(match_result_Matrix[row][col], 0.0))//���������=0�Ĵ���ƥ��ɹ�
+                    if (isequal(match_result_Matrix[row][col], 0.0))//结果矩阵中=0的代表匹配成功
                     {
                         rows_set.insert(choose_rows[row]);
                         cols_set.insert(choose_cols[col]);
@@ -172,33 +172,33 @@ namespace hlg
             }
         }
 
-        //����������ƥ��ɹ��ĸ���Ŀ��,��Ҫ����������,�Լ����������Ŷ�
+        //对于匈牙利匹配成功的跟踪目标,需要更新其坐标,以及提升其置信度
         for (auto &iter : pairs)
         {
-            tracking_things[iter.second].track_frame++;//����֡������
+            tracking_things[iter.second].track_frame++;//跟踪帧数增加
             tracking_things[iter.second].confidenceIncrease();
-            tracking_things[iter.second].box=detected_rects[iter.first];//�ü���������¸��ٽ��
+            tracking_things[iter.second].box=detected_rects[iter.first];//用检测结果来更新跟踪结果
         }
-        //���ھ���̫Զ�ĸ���Ŀ��,��Ҫ���������Ŷ�,���Ŷȵ���һ��ֵ,����Ӻ���ǰɾ��
+        //对于距离太远的跟踪目标,需要降低其置信度,置信度低于一定值,将其从后往前删除
         for (int i = tracking_things.size() - 1; i >= 0; --i)
         {
-            if (cols_set.find(i) != cols_set.end())//���������ƥ��ɹ�
+            if (cols_set.find(i) != cols_set.end())//如果匈牙利匹配成功
                 continue;
-            else if (!tracking_things[i].confidenceDecrease())//���Ŷȼ���0����,�޳���Ŀ��
+            else if (!tracking_things[i].confidenceDecrease())//置信度减到0以下,剔除该目标
             {
                 idTabelDelete(tracking_things[i].id);
                 tracking_things.erase(tracking_things.begin()+i);
             }
-            else//���Ŷ�û����0����,�������ٳɹ���֡��+1
+            else//置信度没减到0以下,算作跟踪成功，帧数+1
             {
-                tracking_things[i].track_frame++;//����֡������
+                tracking_things[i].track_frame++;//跟踪帧数增加
             }
         }
         
-        //���ھ���̫Զ�ļ��Ŀ��,������Ϊ��Ŀ��,���뵽�����б���
+        //对于距离太远的检测目标,将其作为新目标,加入到跟踪列表中
         for (int i = 0; i<detected_rects.size(); i++)
         {
-            if (rows_set.find(i) == rows_set.end())//û��������ƥ��ɹ���Ŀ��
+            if (rows_set.find(i) == rows_set.end())//没有匈牙利匹配成功的目标
             {
                 tracking_things.push_back(Thing(idCreator(), detected_rects[i]));
             }

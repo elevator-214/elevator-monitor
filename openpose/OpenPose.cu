@@ -116,15 +116,15 @@ void OpenPose::DoInference(std::vector<float>& inputData, std::vector<float>& re
     // }
 
     if(mResizeScale > 1) {
-        int widthSouce = mHeatMapDims.d[2];
-        int heightSource = mHeatMapDims.d[1];
-        int widthTarget = mResizeMapDims.d[2];
-        int heightTarget = mResizeMapDims.d[1];
+        int widthSouce = mHeatMapDims.d[2];//80
+        int heightSource = mHeatMapDims.d[1];//60
+        int widthTarget = mResizeMapDims.d[2];//80*8
+        int heightTarget = mResizeMapDims.d[1];//60*8
         const dim3 threadsPerBlock{16, 16, 1};
         const dim3 numBlocks{
-            op::getNumberCudaBlocks(widthTarget, threadsPerBlock.x),
-            op::getNumberCudaBlocks(heightTarget, threadsPerBlock.y),
-            op::getNumberCudaBlocks(mResizeMapDims.d[0], threadsPerBlock.z)};
+            op::getNumberCudaBlocks(widthTarget, threadsPerBlock.x),//640 16
+            op::getNumberCudaBlocks(heightTarget, threadsPerBlock.y),//480 16
+            op::getNumberCudaBlocks(mResizeMapDims.d[0], threadsPerBlock.z)};//78,1
         op::resizeKernel<<<numBlocks, threadsPerBlock>>>((float*)mpResizeMapGpu,(float*)mpHeatMapGpu,widthSouce,heightSource,widthTarget,heightTarget);
         CUDA_CHECK(cudaMemcpy(mpResizeMapCpu, mpResizeMapGpu,mResizeMapSize,cudaMemcpyDeviceToHost));
     }
@@ -170,15 +170,15 @@ void OpenPose::MallocExtraMemory() {
 
     mpHeatMapGpu = mNet->GetBindingPtr(1);
     nvinfer1::Dims heatMapDims = mNet->GetBindingDims(1);
-    std::cout << "heatmap Dims" << heatMapDims.nbDims << std::endl;
-    mHeatMapDims = nvinfer1::Dims3(heatMapDims.d[0],heatMapDims.d[1],heatMapDims.d[2]);
-    std::cout << "heatmap size: " << mBatchSize << " " << mHeatMapDims.d[0] << " " << mHeatMapDims.d[1] << " " << mHeatMapDims.d[2] << std::endl;
+    std::cout << "heatmap Dims" << heatMapDims.nbDims << std::endl;//3
+    mHeatMapDims = nvinfer1::Dims3(heatMapDims.d[0],heatMapDims.d[1],heatMapDims.d[2]);//(78 60 80)
+    std::cout << "heatmap size: " << mBatchSize << " " << mHeatMapDims.d[0] << " " << mHeatMapDims.d[1] << " " << mHeatMapDims.d[2] << std::endl;//1 78 60 80
     mHeatMapSize =  mBatchSize * mHeatMapDims.d[0] * mHeatMapDims.d[1] * mHeatMapDims.d[2] * getElementSize(mInputDataType);
     mpHeatMapCpu = new float[mHeatMapSize / getElementSize(mInputDataType)];
     std::cout << "allocate heatmap host and divice memory done" << std::endl;
 
     // malloc resieze memory
-    mResizeMapDims = nvinfer1::Dims3(mHeatMapDims.d[0],int(mHeatMapDims.d[1]*mResizeScale),int(mHeatMapDims.d[2]*mResizeScale));
+    mResizeMapDims = nvinfer1::Dims3(mHeatMapDims.d[0],int(mHeatMapDims.d[1]*mResizeScale),int(mHeatMapDims.d[2]*mResizeScale));//78 60*8 80*8
     mResizeMapSize = mBatchSize * mResizeMapDims.d[0] * mResizeMapDims.d[1] * mResizeMapDims.d[2] * getElementSize(mInputDataType);
     if(mResizeScale > 1) {
         mpResizeMapGpu = safeCudaMalloc(mResizeMapSize);

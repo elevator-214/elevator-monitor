@@ -59,13 +59,13 @@ private:
     void* mpHeatMapGpu;
     float* mpHeatMapCpu;
     int64_t mHeatMapSize;
-    nvinfer1::Dims3 mHeatMapDims;
+    nvinfer1::Dims3 mHeatMapDims;//(78,60,80)
 
     const float mResizeScale = 8; // resize 8x
     void* mpResizeMapGpu;
     float* mpResizeMapCpu;
     int64_t mResizeMapSize;
-    nvinfer1::Dims3 mResizeMapDims;
+    nvinfer1::Dims3 mResizeMapDims;//(78,60*8,80*8)
 
     void* mpKernelGpu;
     int* mpKernelCpu;

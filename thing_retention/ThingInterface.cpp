@@ -4,7 +4,7 @@
 #include"ThingTrack.h"
 namespace hlg 
 {
-    //��ȡǰ��
+    //前景提取
     void ThingInterface::create_ForeExtraction(const double &inputFrame_rows, const double &inputFrame_cols, bool show_flag)
     {
         if (!fore_extracter)
@@ -19,10 +19,10 @@ namespace hlg
     {
         return fore_extracter->scaledSize;
     }
-    //��ȡǰ��end
+    //前景提取end
 
 
-    //������
+    //目标检测
     void ThingInterface::create_Thingdetector()
     {
         if (!thingdetector)
@@ -42,10 +42,10 @@ namespace hlg
         thingdetector->Get_Thing_Result(things_boxes,thROI);
     }
 
-    //������end
+    //目标检测end
 
 
-    //�������
+    //跟踪
     void ThingInterface::create_Thingtracker()
     {
         if (!thingtracker)
@@ -60,5 +60,5 @@ namespace hlg
     {
         return thingtracker->GetThingsInfo();
     }
-    //�������end
+    //跟踪end
 }
