@@ -31,9 +31,8 @@ This project is implemented in C++ and uses QT for interface interaction. Just a
 cd elevator-monitor
 mkdir build
 cd build
-cmake ..
-make
-./elevator_monitor
+cmake .. && make
+cd .. && bash ./run.sh
 ```
 ## Some models & files required
 
