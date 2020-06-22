@@ -13,6 +13,7 @@ using namespace std;
 
 extern bool cam1_ppCount;
 extern bool cam1_ppRetent;
+extern bool cam1_ppCrowded;
 extern bool cam1_thRetent;
 extern int cam1_ppFlow30s;
 
@@ -33,8 +34,12 @@ class Communication : public QThread
 public:
     Communication();
     ~Communication();
+    int set_opt(int fd,int nSpeed, int nBits, char nEvent, int nStop); 
 private:
-    long long resultTXD;
+	int fd; //设备描述符
+
+
+    uint64_t resultTXD;
     int resultTXD_size;
     int nPipeID;
 

@@ -2,13 +2,12 @@
 #include"kd_tree.h"
 namespace hlg
 {
-
-/*����Ϊ�������Ĵ���*/
+/*下面为大件物体的代码*/
 bool MyCompare_x(const cv::Point point1, const cv::Point point2) { return point1.x < point2.x; }
 bool MyCompare_y(const cv::Point point1, const cv::Point point2) { return point1.y < point2.y; }
 float cal_points_distance(const vector<cv::Point>points1_small, const vector<cv::Point>points2_big)
 {
-	//���������㼯֮�����С���� ʹ��voronoiͼ��kd���ļ��ɣ�ʹ��ʱ�临�Ӷ��½�
+    //计算两个点集之间的最小距离 使用voronoi图和kd树的技巧，使得时间复杂度下降
 	float min_distance = std::numeric_limits<float>::max();
 	return min_distance;
 }
@@ -22,7 +21,7 @@ MyObejctBox::MyObejctBox(const std::vector<cv::Point>&points)
 }
 void MyObejctBox::Update_Box(const std::vector<cv::Point>&points)
 {
-	/*��С����ͨ�������´����ͨ��*/
+    /*用小的连通域来更新大的连通域*/
 	int new_x1 = (*std::min_element(points.begin(), points.end(), MyCompare_x)).x;
 	int new_x3 = (*std::max_element(points.begin(), points.end(), MyCompare_x)).x;
 	int new_y1 = (*std::min_element(points.begin(), points.end(), MyCompare_y)).y;
@@ -55,42 +54,42 @@ ThingInterface::ThingDetector::ThingDetector(const float& big_area_threshold, co
 void ThingInterface::ThingDetector::ThingsDetect(const Mat& ForemaskImage)
 {
     
-	//���ȳ�ʼ��MyBigObejcts
+    //首先初始化MyBigObejcts
 	this->big_obejcts.clear();
 	//clock_t start_time;
 	//start_time = clock();
-	//��ֵ�������Ǵ���ɫ��244~255��������������Ϊ0 ��Ӱ��ȥ��
+    //阈值化，将非纯白色（244~255）的所有像素设为0 将影子去掉
 	Mat final_foremask;
 	cv::threshold(ForemaskImage, final_foremask, 244, 255, cv::THRESH_BINARY);
 
-	// ͨ����̬ѧ�����Զ�ֵ����ͼ�����Ԥ����
+    // 通过形态学操作对二值化的图像进行预处理
 	Mat kernel = getStructuringElement(MORPH_ERODE, Size(3, 3));
 	cv::morphologyEx(final_foremask, final_foremask, cv::MORPH_CLOSE, kernel, Point(-1, -1), 5);
 
-	//Ѱ������
+    //寻找轮廓
 	vector<vector<Point> > contours;
 	vector<Vec4i> hierarchy;
 	findContours(final_foremask, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
-	//����������� �����ĵ����������������� 
-	vector<int>small_contour_ids;	//С�������±�
+    //计算轮廓面积 面积大的当作被检测出来的物体
+    vector<int>small_contour_ids;	//小轮廓的下标
 	size_t big_thing_contourpoint_num = 0;
 	for (int i = 0; i < contours.size(); i++)
 	{
 		const vector<Point>& contour = contours[i];
 		double area = contourArea(Mat(contour));
-		if (area > this->big_area_threshold)//������
+        if (area > this->big_area_threshold)//大物体
 		{
 			big_obejcts.push_back(MyBigObejct(contour));
 			big_thing_contourpoint_num += contour.size();
 		}
-		else if (area>this->small_area_threshold)//С����
+        else if (area>this->small_area_threshold)//小物体
 		{
 			small_contour_ids.push_back(i);
 		}
 	}
-	/*�ȶ�������������кϲ�*/
-	//�ȸ��������������������������ǰ��
+    /*先对面积大的物体进行合并*/
+        //先根据轮廓点进行排序，轮廓点多的在前面
 	sort(big_obejcts.begin(), big_obejcts.end(),
 		[](const MyBigObejct &A, const MyBigObejct &B) {return A.contour_points.size() > B.contour_points.size(); });
 	if (big_obejcts.size() >= 2)
@@ -102,24 +101,24 @@ void ThingInterface::ThingDetector::ThingsDetect(const Mat& ForemaskImage)
 			for (int j = i-1; j >= 0; --j)
 			{
                 //cout << "j:" << j << endl;
-                int x_1= max(big_obejcts[i].box.x1, big_obejcts[j].box.x1);//��x_2������x�����޽���
+                int x_1= max(big_obejcts[i].box.x1, big_obejcts[j].box.x1);//比x_2大则在x方向无交集
 
                 int x_2 = min(big_obejcts[i].box.x3, big_obejcts[j].box.x3);
-				int y_1 = max(big_obejcts[i].box.y1, big_obejcts[j].box.y1);//��y_2������y�����޽���
+                int y_1 = max(big_obejcts[i].box.y1, big_obejcts[j].box.y1);//比y_2大则在y方向无交集
 				int y_2 = min(big_obejcts[i].box.y3, big_obejcts[j].box.y3);
 				if ((x_1 - x_2) < int(this->big_area_distance) && (y_1 - y_2) < int(this->big_area_distance))
-				{//������Ӿ�����ıȽϽ�������������������kd����ѯ�������ѯ�ľ������Ƚ�С���򽫴��������кϲ�
-					const vector<Point> &contour = big_obejcts[j].contour_points;
+                {//对与外接矩形离的比较近的两个大轮廓，进行kd树查询，如果查询的距离结果比较小，则将大轮廓进行合并
+                    const vector<Point> &contour = big_obejcts[i].contour_points;//用轮廓少的建树，可以减少计算量
 					vector<Contour_Point>contour_points(contour.size());
 					int point_count = 0;
 					for (const auto& point : contour)
 					{
-						contour_points[point_count++] = Contour_Point(double(point.x), double(point.y), 0);//����id�޹ؽ�Ҫ��id����0
+                        contour_points[point_count++] = Contour_Point(double(point.x), double(point.y), 0);//这里id无关紧要，id都给0
 					}
-					kdt::KDTree<Contour_Point> kdtree(contour_points);//����kd��
+                    kdt::KDTree<Contour_Point> kdtree(contour_points);//建立kd树
 					Contour_Point query;
 					double min_distance = std::numeric_limits<double>::max();
-					for (const auto&point : big_obejcts[i].contour_points)//��ѯ
+                    for (const auto&point : big_obejcts[j].contour_points)//查询
 					{
 						query.set_coord(point.x, point.y);
 						double distance;
@@ -129,15 +128,15 @@ void ThingInterface::ThingDetector::ThingsDetect(const Mat& ForemaskImage)
 							min_distance = distance;
 						}
 					}
-					if (min_distance < this->big_area_distance) {//kd����ѯ�ľ������ȽϽ�����Ҫ��������������кϲ�
+                    if (min_distance < this->big_area_distance) {//kd树查询的距离结果比较近，需要将两个大物体进行合并
 						//cout << "min_distance:" << min_distance << endl;
-						big_obejcts[j].contour_points.reserve(big_obejcts[j].contour_points.size()+ big_obejcts[i].contour_points.size());//�����һ���㼯����ǰ��
+                        big_obejcts[j].contour_points.reserve(big_obejcts[j].contour_points.size()+ big_obejcts[i].contour_points.size());//将最后一个点集并到前面
 						big_obejcts[j].contour_points.insert(big_obejcts[j].contour_points.end(), big_obejcts[i].contour_points.begin(), big_obejcts[i].contour_points.end());
-						big_obejcts[j].box.rect |= big_obejcts[i].box.rect;//���¾��ο�
+                        big_obejcts[j].box.rect |= big_obejcts[i].box.rect;//更新矩形框
 						big_obejcts[j].box.Update_coordinates();
-						big_obejcts.erase(big_obejcts.begin() + i);//ɾ�����һ���㼯
+                        big_obejcts.erase(big_obejcts.begin() + i);//删除最后一个点集
 						sort(big_obejcts.begin(), big_obejcts.end(),
-							[](const MyBigObejct &A, const MyBigObejct &B) {return A.contour_points.size() > B.contour_points.size(); });//���¸��ݵ㼯��Ŀ���򣬴ﵽ���ټ�������Ч����emmm�����ɻ��������kd����ʱ�临�Ӷ�
+                            [](const MyBigObejct &A, const MyBigObejct &B) {return A.contour_points.size() > B.contour_points.size(); });//重新根据点集数目排序，达到减少计算量的效果。emmm如有疑惑可以算下kd树的时间复杂度
                         break;
                     }
 				}		
@@ -145,11 +144,11 @@ void ThingInterface::ThingDetector::ThingsDetect(const Mat& ForemaskImage)
 		}
 	}
 
-	//���С������鵽�����������������
+    //面积小的物体归到最近的面积大的物体中
 	if (small_contour_ids.size() > 0 && big_obejcts.size() > 0)
 	{
-		/*���ݴ��������������kd��*/
-		//���Ƚ�������������ŵ�������
+        /*根据大物体的轮廓建立kd树*/
+    //首先将大物体轮廓点放到数组中
 		vector<Contour_Point>BigTH_contour_points(big_thing_contourpoint_num);
 		{
 			int i = 0;
@@ -163,9 +162,9 @@ void ThingInterface::ThingDetector::ThingsDetect(const Mat& ForemaskImage)
 			}
 		}
 
-		kdt::KDTree<Contour_Point> kdtree(BigTH_contour_points);//����kd��
+        kdt::KDTree<Contour_Point> kdtree(BigTH_contour_points);//建立kd树
 
-																//��С�������������KD����ѯ����С���������ϲ���������С�Ĵ�����
+                                                                //对小物体的轮廓进行KD树查询，把小物体轮廓合并到距离最小的大物体
 		Contour_Point query;
 		for (const auto&i : small_contour_ids)
 		{
@@ -191,19 +190,19 @@ void ThingInterface::ThingDetector::ThingsDetect(const Mat& ForemaskImage)
 		BigTH_contour_points.clear();
 	}
 	//cout << "before filter:" << this->big_obejcts.size() << endl;
-	this->ThingBox_Filter();//����һЩ�Զ���Ĺ����糤���ȣ������ȵȣ��Լ�������ǰ�������һЩ�ϲ���ɾ��
+    this->ThingBox_Filter();//根据一些自定义的规则，如长宽比，交并比等，对检测出来的前景框进行一些合并及删除
 	//cout << "after filter:" << this->big_obejcts.size() << endl;
 	/*for (const auto &box : this->thing_boxes)
 		cout << "box area:" << box.rect.area() << endl;*/
     if (show_flag)
     {
-        //�������Լ������廭����
+        //将轮廓以及大物体画出来
         RNG g_rng(12345);
         Mat dst = Mat::zeros(ForemaskImage.size(), CV_8UC3);
         for (int i = 0; i< contours.size(); i++)
         {
-            //cout << "��������: " << contours[i].size() << endl;
-            Scalar color = Scalar(g_rng.uniform(0, 255), g_rng.uniform(0, 255), g_rng.uniform(0, 255));//����ֵ
+            //cout << "轮廓点数: " << contours[i].size() << endl;
+            Scalar color = Scalar(g_rng.uniform(0, 255), g_rng.uniform(0, 255), g_rng.uniform(0, 255));//任意值
             const vector<Point>& c = contours[i];
             const double area = contourArea(Mat(c));
             if (area>this->small_area_threshold)
@@ -228,11 +227,11 @@ void ThingInterface::ThingDetector::ThingsDetect(const Mat& ForemaskImage)
 }
 void ThingInterface::ThingDetector::ThingBox_Filter()
 {
-	//����һЩ�Զ���Ĺ����糤���ȣ������ȵȣ��Լ�������ǰ�������һЩ�ϲ���ɾ��
-	//���Ƚ����ΰ�������Ӵ�С��������
+    //根据一些自定义的规则，如长宽比，交并比等，对检测出来的前景框进行一些合并及删除
+    //首先将矩形按照面积从大到小进行排序
 	sort(this->big_obejcts.begin(), this->big_obejcts.end(),
 		[](const MyBigObejct &A, const MyBigObejct &B) {return A.box.rect.area() > B.box.rect.area(); });
-	if (this->big_obejcts.size() >= 2)//������������2�����ο����ȸ��ݽ������Σ���С������� ��ֵ���ϲ������С�ľ���
+    if (this->big_obejcts.size() >= 2)//如果检测结果超过2个矩形框，首先根据交叠矩形：较小面积矩形 的值来合并面积较小的矩形
 	{
 		for (int i = this->big_obejcts.size() - 1; i >= 0; --i)
 		{
@@ -246,14 +245,14 @@ void ThingInterface::ThingDetector::ThingBox_Filter()
 					big_id = j;
 				}		
 			}
-			if (max_inter_small_rate > intersection_small_rate){//�����С�ľ��ν��кϲ�
+            if (max_inter_small_rate > intersection_small_rate){//将面积小的矩形进行合并
 				this->big_obejcts[big_id].box.rect |= this->big_obejcts[i].box.rect;
 				this->big_obejcts[big_id].box.Update_coordinates();
-				this->big_obejcts.erase(big_obejcts.begin() + i);//ɾ��������С�ļ���
+                this->big_obejcts.erase(big_obejcts.begin() + i);//删除这个面积小的检测框
 			}		
 		}
 	}
-	//ɾ����������ֵļ���emmmm
+    //删除长宽比奇怪的检测框emmmm
 	for (int i = this->big_obejcts.size() - 1; i >= 0; --i){
 		const double aspect_ratio = double(this->big_obejcts[i].box.rect.width) / double(this->big_obejcts[i].box.rect.height);
 		//cout << "aspect_ratio:" << aspect_ratio << endl;
@@ -274,7 +273,7 @@ void ThingInterface::ThingDetector::Get_Thing_Result(vector<Rect>&things_boxes, 
 {
     things_boxes.clear();
     things_boxes.reserve(this->big_obejcts.size());
-    //�߶�ת��
+    //尺度转换
     for (int i = 0; i < this->big_obejcts.size(); ++i)
     {
         const int &x1 = big_obejcts[i].box.x1;
@@ -282,13 +281,13 @@ void ThingInterface::ThingDetector::Get_Thing_Result(vector<Rect>&things_boxes, 
         const int &width = big_obejcts[i].box.rect.width;
         const int &height = big_obejcts[i].box.rect.height;
         Rect rect(x1* ScaleFactor_Width, y1*ScaleFactor_Height, width* ScaleFactor_Width, height*ScaleFactor_Height);
-        things_boxes.push_back(rect);//�߶�ת��
+        things_boxes.push_back(rect);//尺度转换
     }
 
 
 
-    //�����趨ROI����һ�����ˣ�ȥ���غ�����Ƚ�С�ģ�����roi����ļ����
-    const double area_ratio_threshold = 0.8;//���ROI�ڵ�������������������ֵ��80%������
+    //根据设定ROI进行一波过滤，去除重合面积比较小的，即在roi外面的检测结果
+    const double area_ratio_threshold = 0.8;//如果ROI内的面积超过大物体面积阈值的80%，则保留
     for (int i = things_boxes.size() - 1; i >= 0; --i)
     {
         const auto & detected_rect = things_boxes[i];

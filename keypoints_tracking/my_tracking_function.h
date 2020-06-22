@@ -9,7 +9,7 @@ huang.liguang@qq.com
 
 namespace hlg{
 
-void x_y_limit(double&x,double&y);//限制长宽
+
 double cross(cv::Point2f A, cv::Point2f B, cv::Point2f P);      //向量AB与向量AP的外积
 
 double dot(cv::Point2f A, cv::Point2f B, cv::Point2f P);         //向量AB与向量AP的外积

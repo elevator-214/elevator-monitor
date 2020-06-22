@@ -2,6 +2,7 @@
 
 bool cam1_ppCount=false;
 bool cam1_ppRetent=false;
+bool cam1_ppCrowded=false;
 bool cam1_thRetent=false;
 bool no_camera1=false;
 int cam1_ppFlow30s=0;
@@ -56,7 +57,7 @@ CamThread1 :: CamThread1()
     //Activity
     ppCount = 0;
     ppRetent = false;
-
+    ppCrowded=false;
     ppFlowIn = 0;
     ppFlowOut = 0;
     ppFlow30s = 0;
@@ -89,12 +90,12 @@ void CamThread1 :: run()
         msleep(1000);
         capture.release();
     }
+    no_camera1=false;
     capture.set(cv::CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH);
     capture.set(cv::CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT);
-    no_camera1=false;
+
     unsigned int fmCurrent = 1;
     Mat src, dst;
-
     /************************/
     /*  People Patameters	*/
     /************************/
@@ -164,6 +165,7 @@ void CamThread1 :: run()
                     no_camera1=true;
                 }
                 capture.read(img);
+                no_camera1=false;
             }
             cv::resize(img,img,Size(CAMERA_WIDTH,CAMERA_HEIGHT));
 //            auto total_start = std::chrono::steady_clock::now();
@@ -379,37 +381,47 @@ void CamThread1 :: run()
             // cout<<"begin pp track"<<endl;
             //Tracking 修正行人卡尔曼滤波位置
             ppTracker.track(ppMeasurement,ppDetectionRect);//ppMeasurement为检测中心点 ppDetectionRect检测矩形框
-            /*判断行人滞留,统计人流量等功能 modified by HLG*/
-            ppRetent = false;
-            cam1_ppRetent=false;
+            /*判断行人滞留,拥堵 统计人流量等功能 modified by HLG*/
+            
+            
             ppCount = ppTracker.target.size();	//count
+            
+            
+             
             
             //滞留判断 画不同颜色矩形框
             static vector<Rect>people_boxes;//存储行人框，用于后面过滤大件物体
             people_boxes.resize(ppCount);
+            ppRetent = false;
             for (int i = 0; i < ppCount; ++i)
             {
                 //retention
-                stringstream ssid;
-                string sid;
-                ssid << ppTracker.target[i].id;
-                ssid >> sid;
+                int id= ppTracker.target[i].id;
                 people_boxes[i]=ppTracker.target[i].box;
                 if (ppTracker.target[i].track_frame > ppRetent_T)
                 {
                     Rect box=Rect(int(ppTracker.target[i].position().x-(ppTracker.target[i].box.width)/2),int(ppTracker.target[i].position().y-(ppTracker.target[i].box.height)/2),ppTracker.target[i].box.width,ppTracker.target[i].box.height);
                     cv::rectangle(dst,box,Scalar(0, 0, 255), 2);
-                    putText(dst, sid, ppTracker.target[i].position(), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2);
+                    putText(dst, std::to_string(id), ppTracker.target[i].position(), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2);
                     ppRetent = true;
-                    cam1_ppRetent=true;
                 }
                 else
                 {
                     Rect box=Rect(int(ppTracker.target[i].position().x-(ppTracker.target[i].box.width)/2),int(ppTracker.target[i].position().y-(ppTracker.target[i].box.height)/2),ppTracker.target[i].box.width,ppTracker.target[i].box.height);
                     cv::rectangle(dst,box,Scalar(255, 255, 0), 2);
-                    putText(dst, sid, ppTracker.target[i].position(), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 0), 1);
+                    putText(dst, std::to_string(id), ppTracker.target[i].position(), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 0), 1);
+                    ppRetent = false;
+                    
                 }
 
+            }
+            //拥堵判断
+            ppCrowded=false;
+            if(ppCount>=3){
+                ppCrowded=true;
+            }
+            else{
+                ppCrowded=false;
             }
 
             //flow 人流量进出判断 30秒人流量统计
@@ -424,14 +436,14 @@ void CamThread1 :: run()
                 ppFlowIn30s_last=ppFlowIn;
                 ppFlowOut30s_last=ppFlowOut;
             }
-
+            
+            
 
             /************************/
             /*  Thing Monitoring 大件物品滞留检测	*/
             /************************/
             //Foreground
-            thRetent = false;
-            cam1_thRetent=false;//与电梯控制器通信
+            
             th_image=src.clone();
 
             if (thing_interface.fore_ExtractFore(th_image, foregroundMask))//提取前景
@@ -448,7 +460,7 @@ void CamThread1 :: run()
 
                 const vector<vector<int>>&tracking_result = thing_interface.track_GetThingsInfo();
                 //滞留检测 画图像
- 
+                thRetent = false;
                 for (int i = 0; i < tracking_result.size(); ++i)
                 {   
                     const int x1 = max(tracking_result[i][0], thROI.x);
@@ -458,25 +470,57 @@ void CamThread1 :: run()
                     const Rect rect(x1,y1,x3-x1+1,y3-y1+1);
                     const int &track_frame = tracking_result[i][4];
                     const int &id = tracking_result[i][5];
-                    stringstream ssid;
-                    string sid;
-                    ssid << id;
-                    ssid >> sid;
+
                     if (track_frame > retention_frame_threshold)
                     {//达到滞留帧数阈值，用红色画框,否则用品红色画框
                         cv::rectangle(dst, rect,cv::Scalar(0, 0, 255));
-                        putText(dst, sid,cv::Point((x1+x3)/2,(y1+y3)/2), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 1);
+                        putText(dst, std::to_string(id),cv::Point((x1+x3)/2,(y1+y3)/2), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 1);
                         thRetent = true;
-                        cam1_thRetent=true;
+                   
                     }
                     else
                     {
+                        thRetent = false;
                         cv::rectangle(dst, rect,cv::Scalar(255, 0, 255));
-                        putText(dst, sid, cv::Point((x1+x3)/2,(y1+y3)/2), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 0, 255), 1);
+                        putText(dst, std::to_string(id), cv::Point((x1+x3)/2,(y1+y3)/2), FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 0, 255), 1);
                     }                   
                 }
 
             }
+            
+            ////通信标志位 
+            if(ppCount>0){//是否有乘客人头
+                cam1_ppCount=true;            
+            }
+            else{
+                cam1_ppCount=false;
+            }
+            
+            if(ppRetent){//乘客滞留
+                cam1_ppRetent=true;            
+            }
+            else{
+                cam1_ppRetent=false;
+            }
+            
+            if(ppCrowded){//乘客拥堵
+                cam1_ppCrowded=true;            
+            }
+            else{
+                cam1_ppCrowded=false;
+            }
+            
+            if(thRetent){//物体滞留
+                cam1_thRetent=true;            
+            }
+            else{
+                cam1_thRetent=false;
+            }
+            
+            cam1_ppFlow30s=ppFlow30s;//人流量
+
+            
+
 
 
             //dst  将检测结果发送给QT
@@ -500,33 +544,24 @@ void CamThread1 :: run()
                 putText(QT_img, "ppRetent:yes", disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2);
             else
                 putText(QT_img, "ppRetent:no", disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
+            //ppCrowded行人是否拥堵
+            disPos.y += 20;
+            if (ppCrowded)
+                putText(QT_img, "ppCrowded:yes", disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255), 2);
+            else
+                putText(QT_img, "ppCrowded:no", disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
 
             //ppFlowIn人流进入
             disPos.y += 20;
-            stringstream ssPpFlowIn;
-            string sPpFlowIn;
-            ssPpFlowIn << ppFlowIn;
-            ssPpFlowIn >> sPpFlowIn;
-            sPpFlowIn = "ppIn:" + sPpFlowIn;
-            putText(QT_img, sPpFlowIn, disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
+            putText(QT_img, "ppIn:" + std::to_string(ppFlowIn), disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
 
             //ppFlowOut 人流走出
             disPos.y += 20;
-            stringstream ssPpFlowOut;
-            string sPpFlowOut;
-            ssPpFlowOut << ppFlowOut;
-            ssPpFlowOut >> sPpFlowOut;
-            sPpFlowOut = "ppOut:" + sPpFlowOut;
-            putText(QT_img, sPpFlowOut, disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
+            putText(QT_img,  "ppOut:" +std::to_string(ppFlowOut), disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
 
             //ppFlow30s  30秒人流量
             disPos.y += 20;
-            stringstream ssPpFlow30s;
-            string sPpFlow30s;
-            ssPpFlow30s << ppFlow30s;
-            ssPpFlow30s >> sPpFlow30s;
-            sPpFlow30s = "pp30s:" + sPpFlow30s;
-            putText(QT_img, sPpFlow30s, disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
+            putText(QT_img, "pp30s:" + std::to_string(ppFlow30s), disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
 
             //thRetent   大件物品滞留
             disPos.y += 20;
@@ -538,13 +573,8 @@ void CamThread1 :: run()
             //fps  处理速度
             disPos.y += 20;
             fps = (double)getTickFrequency() / ((double)getTickCount() - fps);
-            //cout << "fps:" << fps << endl;
-            stringstream ssFps;
-            string sFps;
-            ssFps << fps;
-            ssFps >> sFps;
-            sFps = "fps:" + sFps;
-            putText(QT_img, sFps, disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
+            putText(QT_img, "fps"+std::to_string(fps), disPos, FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 255, 0), 1);
+
 
             //camera location  摄像头安装位置
             disPos.x = 520;

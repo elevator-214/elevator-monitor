@@ -33,7 +33,7 @@ CamThread4 :: CamThread4()
    // CAMERA_NUM = 6;
 //    CAMERA_NUM = 1;
     CAMERA_NUM = hlg::cam4_CAMERA_NUM;
-    CAMERA_STOP = hlg::cam4_CAMERA_WIDTH;
+    CAMERA_STOP = false;
     fmMinue =hlg::cam4_fmMinue;
 
     //hdROI
@@ -53,7 +53,7 @@ CamThread4 :: ~CamThread4()
 
 void CamThread4 :: run()
 {
-    //while(true);
+  //  while(true);
 //    while(true)
 //    {
 ////        cout<<"cam4"<<endl;

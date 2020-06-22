@@ -1,0 +1,4 @@
+KERNEL=="video*", SUBSYSTEMS=="usb", KERNELS=="1-4.2", SYMLINK+="video7"
+KERNEL=="video*", SUBSYSTEMS=="usb", KERNELS=="1-4.3", SYMLINK+="video6"
+KERNEL=="video*", SUBSYSTEMS=="usb", KERNELS=="1-2", SYMLINK+="video5"
+

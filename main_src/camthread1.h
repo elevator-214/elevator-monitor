@@ -47,6 +47,7 @@ public:
 
     //Activity
     unsigned int ppCount;
+    bool ppCrowded;
     bool ppRetent;
     int ppFlowIn;
     int ppFlowOut;
