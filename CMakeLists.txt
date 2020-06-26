@@ -31,7 +31,9 @@ add_subdirectory(munkres)
 add_subdirectory(kalman_track)
 add_subdirectory(thing_retention)
 add_subdirectory(tiny-tensorrt)
+add_subdirectory(gcn)
 add_subdirectory(openpose)
+
 add_subdirectory(keypoints_tracking)
 add_subdirectory(main_src)
 
