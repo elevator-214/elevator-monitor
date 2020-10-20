@@ -36,7 +36,8 @@ cd .. && bash ./run.sh
 ```
 ## Some models & files required
 
-**BaiduYunPan url:** https://pan.baidu.com/s/1HLDYnXif759s__yVIvGd_Q Extraction code:1pxh
+**BaiduYunPan url:** https://pan.baidu.com/s/1HLDYnXif759s__yVIvGd_Q 
+**Extraction code:**1pxh
 
 **usage**:Download and move models & files to **build/**
 
